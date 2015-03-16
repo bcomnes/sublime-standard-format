@@ -23,6 +23,6 @@ Install Standard Format using [Package Control](https://packagecontrol.io/).
 
 You can find Standard Format settings in the `StandardFormat.sublime-settings` file.
 
-- `autoformat`: Boolean.  Runs Standard Format on save when set to true.
+- `format_on_save`: Boolean.  Runs Standard Format on save when set to true.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
 - `standard-format-path`: String Path.  You don't have to set this.  Standard Format uses whichever `standard-format` is in your path.  This setting allows you to specify the path of which `standard-format` you are using.

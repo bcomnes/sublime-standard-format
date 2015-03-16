@@ -1,7 +1,10 @@
 {
-    // autoformat on save
-    "autoformat": false,
+    // format on save
+    "format_on_save": true,
 
     // array of extensions for autoformat
-    "extensions": ["js"]
+    "extensions": ["js"],
+
+    // Command or path to run against
+    "command": "standard-format"
 }

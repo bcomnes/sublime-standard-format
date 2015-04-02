@@ -82,8 +82,6 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         for region in regions:
             self.do_format(edit, region, view)
 
-        #self.format_whole_file(edit, opts, self.view)
-
     def do_format(self, edit, region, view):
         s = view.substr(region)
         s, err = standard_format(s)

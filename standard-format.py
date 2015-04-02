@@ -3,7 +3,6 @@ import sublime_plugin
 import subprocess
 import os
 
-
 SETTINGS_FILE = "StandardFormat.sublime-settings"
 LOCAL = "/usr/local/bin:/usr/local/sbin"
 os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])

@@ -1,11 +1,9 @@
 # Standard Format
-[WIP] Runs [standard-format](https://github.com/maxogden/standard-format) against the code in your ST3 window on save or manually.  Can be toggled on or off.  Besides that, there are no settings.
-
-# WIP Instructions Dont work yet!
+Runs [standard-format](https://github.com/maxogden/standard-format) against the code in your ST3 window on save or manually.  Can be toggled on or off.  Besides that, there are no settings.
 
 ## Installation
 
-Standard Format (the Sublime Plugin) requires that you install [`standard-format`]() to your global path:
+Standard Format (the Sublime Text Plug-in) requires that you install [`standard-format`](https://github.com/maxogden/standard-format) to your global path:
 
 ```sh
 $ npm install -g standard-format
@@ -25,4 +23,4 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 
 - `format_on_save`: Boolean.  Runs Standard Format on save when set to true.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
-- `standard-format-path`: String Path.  You don't have to set this.  Standard Format uses whichever `standard-format` is in your path.  This setting allows you to specify the path of which `standard-format` you are using.
+- `loud_error`: Boolian.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.

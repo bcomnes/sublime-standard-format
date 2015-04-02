@@ -5,8 +5,7 @@ import os
 import time
 import merge_utils
 
-# Insane sublime pathing!  Please open issues if this doesn't cut it.
-# TODO: Test on windows :[
+# Please open issues if we are missing a common bin path
 LOCAL = '/usr/local/bin:/usr/local/sbin'
 os.environ['PATH'] = ":".join([LOCAL, os.environ['PATH']])
 
@@ -41,15 +40,15 @@ def is_javascript(view):
     return False
 
 
-def standard_format(code, opts):
+def standard_format(string):
     std = subprocess.Popen(
         ["standard-format"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    std.stdin.write(bytes(code, 'UTF-8'))
+    std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
-    return out.decode("utf-8")
+    return out.decode("utf-8"), err
 
 
 class StandardFormatEventListener(sublime_plugin.EventListener):
@@ -62,12 +61,31 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        opts = settings
-        self.format_whole_file(edit, opts, self.view)
+        view = self.view
+        regions = []
+        sel = view.sel()
 
-    def format_whole_file(self, edit, opts, view):
-        settings = view.settings()
-        region = sublime.Region(0, view.size())
-        code = view.substr(region)
-        formatted_code = standard_format(code, opts)
-        view.replace(edit, region, formatted_code)
+        for region in sel:
+            if not region.empty():
+                regions.append(region)
+
+        if len(regions) < 1:
+            # No selected regions, so format the whole file.
+            allreg = sublime.Region(0, view.size())
+            regions.append(allreg)
+
+        for region in regions:
+            self.do_format(edit, region, view)
+
+        #self.format_whole_file(edit, opts, self.view)
+
+    def do_format(self, edit, region, view):
+        s = view.substr(region)
+        s, err = standard_format(s)
+        if not err and len(s) > 0:
+            print('formatting')
+            view.replace(edit, region, s)
+        elif err:
+            loud = settings.get("format_on_save")
+            msg = 'standard-format: error formatting selection(s)'
+            sublime.error_message(msg) if loud else sublime.status_message(msg)

@@ -6,5 +6,8 @@
     "extensions": ["js"],
 
     // Command or path to run against
-    "command": "standard-format"
+    "command": "standard-format",
+
+    // Pop up error window on formatting errors
+    "loud_error": false
 }

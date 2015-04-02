@@ -2,12 +2,12 @@ import sublime
 import sublime_plugin
 import subprocess
 import os
-import time
-import merge_utils
 
+
+SETTINGS_FILE = "StandardFormat.sublime-settings"
+LOCAL = "/usr/local/bin:/usr/local/sbin"
+os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 # Please open issues if we are missing a common bin path
-LOCAL = '/usr/local/bin:/usr/local/sbin'
-os.environ['PATH'] = ":".join([LOCAL, os.environ['PATH']])
 
 settings = None
 
@@ -26,7 +26,9 @@ def plugin_loaded():
 
 
 def is_javascript(view):
-    """Checks if the current view is javascript or not.  Used pre_save event"""
+    """
+    Checks if the current view is javascript or not.  Used in pre_save event.
+    """
     # Check the file extension
     name = view.file_name()
     excludes = set(settings.get('excludes', []))
@@ -41,6 +43,9 @@ def is_javascript(view):
 
 
 def standard_format(string):
+    """
+    Usses suprocess to format a given string.
+    """
     std = subprocess.Popen(
         ["standard-format"],
         stdin=subprocess.PIPE,
@@ -89,3 +94,18 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             loud = settings.get("format_on_save")
             msg = 'standard-format: error formatting selection(s)'
             sublime.error_message(msg) if loud else sublime.status_message(msg)
+
+
+class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit):
+        if settings.get('format_on_save', False):
+            settings.set('format_on_save', False)
+            sublime.status_message("Format on save: Off")
+        else:
+            settings.set('format_on_save', True)
+            sublime.status_message("Format on save: On")
+        sublime.save_settings(SETTINGS_FILE)
+
+    def is_checked(self):
+        return settings.get('format_on_save', False)

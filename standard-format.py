@@ -2,8 +2,6 @@ import sublime
 import sublime_plugin
 import subprocess
 import os
-import time
-import merge_utils
 
 # Insane sublime pathing!  Please open issues if this doesn't cut it.
 # TODO: Test on windows :[
@@ -66,7 +64,6 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         self.format_whole_file(edit, opts, self.view)
 
     def format_whole_file(self, edit, opts, view):
-        settings = view.settings()
         region = sublime.Region(0, view.size())
         code = view.substr(region)
         formatted_code = standard_format(code, opts)

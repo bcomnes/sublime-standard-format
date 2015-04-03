@@ -25,7 +25,7 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 
 - `format_on_save`: Boolean.  Runs Standard Format on save when set to true.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
-- `loud_error`: Boolian.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
+- `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
 
 ## Linter
 

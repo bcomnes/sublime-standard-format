@@ -31,5 +31,5 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 
 Standard Format pairs nicely with the Sublime Text `standard` linter:
 
-[Flet/SublimeLinter-contrib-standard](https://github.com/Flet/SublimeLinter-contrib-standard)
+- [Flet/SublimeLinter-contrib-standard](https://github.com/Flet/SublimeLinter-contrib-standard)
 

@@ -12,7 +12,7 @@ Auto-formatting issues can be directed at:
 
   https://github.com/maxogden/standard-format/issues
 
-Please view the README for more information for more documentation.
+Please view the README for more information/documentation.
 
 Consider installing the standard-format linter plug-in:
 

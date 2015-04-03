@@ -1,0 +1,15 @@
+Standard Format
+---------------
+This auto-formatter requires that you install `standard-format` in order to function properly:
+
+  $ npm install standard-format -g
+
+Please file any issues with the plug-in you come across at:
+
+  https://github.com/bcomnes/sublime-standard-format/issues
+
+Auto-formatting issues can be directed at:
+
+  https://github.com/maxogden/standard-format/issues
+
+Please view the README for more information for more documentation.

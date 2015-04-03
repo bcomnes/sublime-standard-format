@@ -1,6 +1,0 @@
-Standard Format v1.0.0
-----------------------
-
-Please ensure `standard-format` is installed globally at or above v1.3.5:
-
-  $ npm i standard-format -g

@@ -5,7 +5,7 @@ import os
 import shutil
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
-LOCAL = "/usr/local/bin:/usr/local/sbin"
+LOCAL = ":".join(["/usr/local/bin", "/usr/local/sbin"])
 os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 # Please open issues if we are missing a common bin path
 

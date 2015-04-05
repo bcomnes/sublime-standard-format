@@ -25,9 +25,18 @@ Install Standard Format using [Package Control](https://packagecontrol.io/).
 
 You can find Standard Format settings in the `StandardFormat.sublime-settings` file.
 
-- `format_on_save`: Boolean.  Runs Standard Format on save when set to true.
+- `format_on_save`: Boolean.  Runs Standard Format on save when set to true.  Use the command pallet to quickly toggle this on or off.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
+- `excludes`: String Array.  An array of file extensions that you don't want to run against.
+- `command`: String Array.  Customize the command and flags that **Standard Format** runs against.
+- `PATH` **Not Implemented Yet**: String Array.  An Array of paths to be appended to the search PATH.
 - `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
+
+## Hints
+
+**Standard Format** will try to find and use (`command` to format with if set, otherwise it will fall back to) `standard-format` or `standard`.
+
+Windows support is coming very soon, but PRs welcome.
 
 ## Linter
 

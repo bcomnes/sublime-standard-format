@@ -26,12 +26,12 @@ def validate_command(command):
         msg = "{} could not be found. Using standard-format".format(
             command[0])
         print("StandardFormat: " + msg)
-        return ["standard-format", "--stdfmt"]
+        return ["standard-format", "--stdin"]
     elif shutil.which("standard"):
         # and if that isn't around use standard
         msg = "Can't find standard-format.  Falling back to standard"
         print("StandardFormat: " + msg)
-        return ["standard", "--format", "--stdfmt"]
+        return ["standard", "--format", "--stdin"]
     else:
         msg = "Please install standard-format: 'npm i standard-format -g' \
             or extend PATH in settings"

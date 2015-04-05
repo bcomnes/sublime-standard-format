@@ -3,6 +3,8 @@
 
 A Sublime Text 3 plug-in that runs [standard-format](https://github.com/maxogden/standard-format) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Besides compatibility details, there are no settings.
 
+![action gif](https://cdn.rawgit.com/bcomnes/sublime-standard-format/master/format.gif)
+
 ## Installation
 
 Standard Format (the Sublime Text Plug-in) requires that you install [`standard-format`](https://github.com/maxogden/standard-format) to your global path:

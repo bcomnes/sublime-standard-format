@@ -1,7 +1,7 @@
 # Standard Format
 [![Build Status](https://travis-ci.org/bcomnes/sublime-standard-format.svg?branch=master)](https://travis-ci.org/bcomnes/sublime-standard-format)
 
-A Sublime Text 3 plug-in that runs [standard-format](https://github.com/maxogden/standard-format) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Besides compatability details, there are no settings.
+A Sublime Text 3 plug-in that runs [standard-format](https://github.com/maxogden/standard-format) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Besides compatibility details, there are no settings.
 
 ## Installation
 
@@ -32,4 +32,14 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 Standard Format pairs nicely with the Sublime Text `standard` linter:
 
 - [Flet/SublimeLinter-contrib-standard](https://github.com/Flet/SublimeLinter-contrib-standard)
+
+## References
+
+- https://github.com/piuccio/sublime-esformatter
+- https://github.com/ionutvmi/sublime-jsfmt
+- https://github.com/enginespot/js-beautify-sublime
+- https://github.com/jdc0589/JsFormat/commits/master
+- https://github.com/akalongman/sublimetext-codeformatter
+- https://github.com/DisposaBoy/GoSublime
+- https://github.com/Flet/SublimeLinter-contrib-standard
 

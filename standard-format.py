@@ -10,14 +10,6 @@ os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 
 settings = None
 
-# Thank you to the following ST plugins for providing a nice set of examples:
-# - https://github.com/piuccio/sublime-esformatter
-# - https://github.com/ionutvmi/sublime-jsfmt
-# - https://github.com/enginespot/js-beautify-sublime
-# - https://github.com/jdc0589/JsFormat/commits/master
-# - https://github.com/akalongman/sublimetext-codeformatter
-# - https://github.com/DisposaBoy/GoSublime
-
 
 def plugin_loaded():
     global settings

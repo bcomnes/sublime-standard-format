@@ -1,12 +1,13 @@
 {
-    // format on save
     "format_on_save": true,
 
-    // array of extensions for autoformat
+    // array of extensions to format on save
     "extensions": ["js"],
 
-    // Command or path to run against
-    "command": "standard-format",
+    // Array of command and flags to run against.
+    // Content will be piped into this command
+    // This is a string array that is passed to subprocess
+    "command": ["standard-format", "--stdin"],
 
     // Pop up error window on formatting errors
     "loud_error": false

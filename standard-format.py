@@ -2,6 +2,7 @@ import sublime
 import sublime_plugin
 import subprocess
 import os
+import shutil
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
 LOCAL = "/usr/local/bin:/usr/local/sbin"
@@ -9,11 +10,39 @@ os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 # Please open issues if we are missing a common bin path
 
 settings = None
+command = None
+
+
+def validate_command(command):
+    """
+    Tries to validate and return a working formatting command
+    """
+    if shutil.which(command[0]):
+        # Try to use provided command
+        return command
+    elif command[0] != "standard-format" and shutil.which("standard-format"):
+        # Otherwise just use standard-format
+        msg = "{} could not be found. Using standard-format".format(
+            command[0])
+        print("StandardFormat: " + msg)
+        return ["standard-format", "--stdfmt"]
+    elif shutil.which("standard"):
+        # and if that isn't around use standard
+        msg = "Can't find standard-format.  Falling back to standard"
+        print("StandardFormat: " + msg)
+        return ["standard", "--format", "--stdfmt"]
+    else:
+        msg = "Please install standard-format: 'npm i standard-format -g' \
+            or extend PATH in settings"
+        print("StandardFormat: " + msg)
+        return None
 
 
 def plugin_loaded():
     global settings
+    global command
     settings = sublime.load_settings("StandardFormat.sublime-settings")
+    command = validate_command(settings.get("command"))
 
 
 def is_javascript(view):
@@ -33,12 +62,12 @@ def is_javascript(view):
     return False
 
 
-def standard_format(string):
+def standard_format(string, command):
     """
     Uses subprocess to format a given string.
     """
     std = subprocess.Popen(
-        ["standard-format"],
+        command,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
@@ -57,6 +86,9 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
+        if not command:
+            # Noop if we don't have the right tools.
+            return None
         view = self.view
         regions = []
         sel = view.sel()
@@ -75,9 +107,8 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def do_format(self, edit, region, view):
         s = view.substr(region)
-        s, err = standard_format(s)
+        s, err = standard_format(s, command)
         if not err and len(s) > 0:
-            print('formatting')
             view.replace(edit, region, s)
         elif err:
             loud = settings.get("format_on_save")

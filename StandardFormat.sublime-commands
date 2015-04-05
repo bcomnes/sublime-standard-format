@@ -1,20 +1,20 @@
 [
-    { 
-      "caption": "Standard Format: Format current file", 
-      "command": "standard_format" 
+    {
+      "caption": "Standard Format: Format current file",
+      "command": "standard_format"
     },
     {
       "caption": "Standard Format: Toggle format on save",
       "command": "toggle_standard_format"
     },
     {
-        "caption": "Standard Format: Settings - Default",
+        "caption": "Preferences: Standard Format Settings – Default",
         "command": "open_file",
         "args": {"file": "${packages}/StandardFormat/StandardFormat.sublime-settings"}
     },
     {
-        "caption": "Standard Format: Settings - User",
+        "caption": "Preferences: Standard Format Settings - User",
         "command": "open_file",
         "args": {"file": "${packages}/User/StandardFormat.sublime-settings"}
-    }
+    },
 ]

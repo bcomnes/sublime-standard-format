@@ -43,7 +43,7 @@ def is_javascript(view):
 
 def standard_format(string):
     """
-    Usses suprocess to format a given string.
+    Uses subprocess to format a given string.
     """
     std = subprocess.Popen(
         ["standard-format"],

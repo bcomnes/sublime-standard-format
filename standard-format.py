@@ -43,6 +43,9 @@ def plugin_loaded():
     global command
     settings = sublime.load_settings("StandardFormat.sublime-settings")
     command = validate_command(settings.get("command"))
+    if sublime.platform() == "windows" and command != None:
+        command[0] = shutil.which(command[0])
+
 
 
 def is_javascript(view):

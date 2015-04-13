@@ -11,6 +11,7 @@ os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 
 settings = None
 command = None
+platform = sublime.platform()
 
 
 def validate_command(command):
@@ -43,7 +44,7 @@ def plugin_loaded():
     global command
     settings = sublime.load_settings("StandardFormat.sublime-settings")
     command = validate_command(settings.get("command"))
-    if sublime.platform() == "windows" and command != None:
+    if platform == "windows" and command != None:
         command[0] = shutil.which(command[0])
 
 
@@ -69,11 +70,15 @@ def standard_format(string, command):
     """
     Uses subprocess to format a given string.
     """
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     std = subprocess.Popen(
         command,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+        stderr=subprocess.PIPE,
+        startupinfo=startupinfo
+        )
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
     return out.decode("utf-8"), err

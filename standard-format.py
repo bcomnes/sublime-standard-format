@@ -69,8 +69,14 @@ def standard_format(string, command):
     """
     Uses subprocess to format a given string.
     """
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+    startupinfo = None
+
+    if platform == "windows":
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+
     std = subprocess.Popen(
         command,
         stdin=subprocess.PIPE,

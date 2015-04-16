@@ -86,7 +86,7 @@ def standard_format(string, command):
         )
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
-    return out.decode("utf-8"), err
+    return out.decode("utf-8").replace("\r", ""), err
 
 
 class StandardFormatEventListener(sublime_plugin.EventListener):

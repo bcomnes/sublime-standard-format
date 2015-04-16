@@ -36,7 +36,7 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 
 **Standard Format** will try to find and use (`command` to format with if set, otherwise it will fall back to) `standard-format` or `standard`.
 
-Windows support is coming very soon, but PRs welcome.
+Windows is now supported.  Please open any issues that you come across.
 
 ## Linter
 

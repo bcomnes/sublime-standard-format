@@ -5,8 +5,6 @@ import os
 import shutil
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
-LOCAL = ":".join(["/usr/local/bin", "/usr/local/sbin"])
-os.environ["PATH"] = ":".join([LOCAL, os.environ["PATH"]])
 # Please open issues if we are missing a common bin path
 
 settings = None
@@ -14,7 +12,17 @@ command = None
 platform = sublime.platform()
 
 
-def validate_command(command):
+def set_path(user_paths):
+    # Please open issues if we are missing a common bin path
+    well_known = ["/usr/local/bin"]
+    path_array = user_paths + well_known
+    paths = ":".join(path_array)
+    os.environ["PATH"] = ":".join([paths, os.environ["PATH"]])
+    msg = "Standard Format Search Path: " + os.environ["PATH"]
+    print(msg)
+
+
+def get_command(command):
     """
     Tries to validate and return a working formatting command
     """
@@ -43,8 +51,14 @@ def plugin_loaded():
     global settings
     global command
     settings = sublime.load_settings("StandardFormat.sublime-settings")
-    command = validate_command(settings.get("command"))
+
+    # Add custom user paths
+    user_paths = settings.get("PATH")
+    set_path(user_paths)
+    # Figure out if the desired formatter is available
+    command = get_command(settings.get("command"))
     if platform == "windows" and command is not None:
+        # Windows hax
         command[0] = shutil.which(command[0])
 
 
@@ -83,7 +97,7 @@ def standard_format(string, command):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         startupinfo=startupinfo
-        )
+    )
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
     return out.decode("utf-8").replace("\r", ""), err

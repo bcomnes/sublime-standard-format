@@ -29,7 +29,7 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
 - `excludes`: String Array.  An array of file extensions that you don't want to run against.
 - `command`: String Array.  Customize the command and flags that **Standard Format** runs against.
-- `PATH` **Not Implemented Yet**: String Array.  An Array of paths to be appended to the search PATH.
+- `PATH`: **Optional** String Array.  An Array of paths to be appended to the search PATH.  You must have `node` and `standard-format` in your search path.  `/usr/local/bin` is searched by default
 - `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
 
 ## Hints

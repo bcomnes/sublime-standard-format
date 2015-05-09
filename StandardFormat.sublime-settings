@@ -1,6 +1,8 @@
 {
     "format_on_save": true,
 
+    "PATH": [],
+
     // array of extensions to format on save
     "extensions": ["js"],
 

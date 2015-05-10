@@ -88,6 +88,7 @@ def standard_format(string, command):
     startupinfo = None
 
     if platform == "windows":
+        # Prevent cmd.exe window from popping up
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
         startupinfo.wShowWindow = subprocess.SW_HIDE

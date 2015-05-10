@@ -1,0 +1,6 @@
+Standard Format
+---------------
+
+- Fixed: loud_error respects user setting now. https://github.com/bcomnes/sublime-standard-format/issues/18
+- Added: Custom search path via the "PATH" configuation option.
+- Changed: Ignore selection when formatting on save

@@ -7,6 +7,7 @@ import shutil
 SETTINGS_FILE = "StandardFormat.sublime-settings"
 # Please open issues if we are missing a common bin path
 
+DEFAULT_PATH = os.environ["PATH"]
 settings = None
 command = None
 platform = sublime.platform()
@@ -17,7 +18,7 @@ def set_path(user_paths):
     well_known = ["/usr/local/bin"]
     path_array = user_paths + well_known
     paths = ":".join(path_array)
-    os.environ["PATH"] = ":".join([paths, os.environ["PATH"]])
+    os.environ["PATH"] = ":".join([paths, DEFAULT_PATH])
     msg = "Standard Format Search Path: " + os.environ["PATH"]
     print(msg)
 
@@ -107,12 +108,12 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
         if settings.get("format_on_save") and is_javascript(view):
-            view.run_command("standard_format")
+            view.run_command("standard_format", {"auto_save": True})
 
 
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
-    def run(self, edit):
+    def run(self, edit, auto_save=None):
         if not command:
             # Noop if we don't have the right tools.
             return None
@@ -120,14 +121,18 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         regions = []
         sel = view.sel()
 
-        for region in sel:
-            if not region.empty():
-                regions.append(region)
-
-        if len(regions) < 1:
-            # No selected regions, so format the whole file.
+        if auto_save:
             allreg = sublime.Region(0, view.size())
             regions.append(allreg)
+        else:
+            for region in sel:
+                if not region.empty():
+                    regions.append(region)
+
+            if len(regions) < 1:
+                # No selected regions, so format the whole file.
+                allreg = sublime.Region(0, view.size())
+                regions.append(allreg)
 
         for region in regions:
             self.do_format(edit, region, view)

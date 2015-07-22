@@ -1,6 +1,6 @@
 Standard Format
 ---------------
-This auto-formatter requires that you install `standard-format` in order to function properly:
+This auto-formatter requires that you install `standard-format` or `standard` in order to function properly:
 
   $ npm i standard-format -g
 
@@ -14,6 +14,6 @@ Auto-formatting issues can be directed at:
 
 Please view the README for more information/documentation.
 
-Consider installing the standard-format linter plug-in:
+Consider installing the `standard` linter plug-in:
 
   https://github.com/Flet/SublimeLinter-contrib-standard

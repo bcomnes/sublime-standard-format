@@ -11,6 +11,7 @@ DEFAULT_PATH = os.environ["PATH"]
 settings = None
 platform = sublime.platform()
 
+
 def set_path(user_paths):
     # Please open issues if we are missing a common bin path
     well_known = ["/usr/local/bin"]

@@ -1,0 +1,11 @@
+Standard Format
+---------------
+
+*** POTENTIALLY BREAKING CHANGES ***
+
+- Changed: Standard formatter is now found every time Sublime-Standard-Format runs. https://github.com/bcomnes/sublime-standard-format/pull/33by
+- Changed: Subllime-standard-format now searches "./node_modules/.bin" and "~/npm-global/bin" by default.
+
+Please open any issues or send PRs if you run into issues, and we can deal with them as soon as possible.
+
+https://github.com/bcomnes/sublime-standard-format

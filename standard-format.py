@@ -9,13 +9,13 @@ SETTINGS_FILE = "StandardFormat.sublime-settings"
 
 DEFAULT_PATH = os.environ["PATH"]
 settings = None
-command = None
 platform = sublime.platform()
 
 
 def set_path(user_paths):
     # Please open issues if we are missing a common bin path
-    well_known = ["/usr/local/bin"]
+    well_known = ["./node_modules/.bin",
+                  os.environ["HOME"] + "/npm-global/bin", "/usr/local/bin"]
     path_array = user_paths + well_known
     paths = ":".join(path_array)
     os.environ["PATH"] = ":".join([paths, DEFAULT_PATH])
@@ -50,17 +50,11 @@ def get_command(command):
 
 def plugin_loaded():
     global settings
-    global command
     settings = sublime.load_settings("StandardFormat.sublime-settings")
 
     # Add custom user paths
     user_paths = settings.get("PATH")
     set_path(user_paths)
-    # Figure out if the desired formatter is available
-    command = get_command(settings.get("command"))
-    if platform == "windows" and command is not None:
-        # Windows hax
-        command[0] = shutil.which(command[0])
 
 
 def is_javascript(view):
@@ -115,6 +109,11 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, auto_save=None):
+        # Figure out if the desired formatter is available
+        command = get_command(settings.get("command"))
+        if platform == "windows" and command is not None:
+            # Windows hax
+            command[0] = shutil.which(command[0])
         if not command:
             # Noop if we don't have the right tools.
             return None
@@ -136,9 +135,9 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
                 regions.append(allreg)
 
         for region in regions:
-            self.do_format(edit, region, view)
+            self.do_format(edit, region, view, command)
 
-    def do_format(self, edit, region, view):
+    def do_format(self, edit, region, view, command):
         s = view.substr(region)
         s, err = standard_format(s, command)
         if not err and len(s) > 0:

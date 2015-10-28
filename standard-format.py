@@ -17,8 +17,8 @@ def set_path(user_paths):
     well_known = ["./node_modules/.bin",
                   os.environ["HOME"] + "/npm-global/bin", "/usr/local/bin"]
     path_array = user_paths + well_known
-    paths = ":".join(path_array)
-    os.environ["PATH"] = ":".join([paths, DEFAULT_PATH])
+    paths = os.pathsep.join(path_array)
+    os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])
     msg = "Standard Format Search Path: " + os.environ["PATH"]
     print(msg)
 

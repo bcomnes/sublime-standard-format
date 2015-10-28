@@ -14,8 +14,8 @@ platform = sublime.platform()
 
 def set_path(user_paths):
     # Please open issues if we are missing a common bin path
-    well_known = ["./node_modules/.bin",
-                  os.environ["HOME"] + "/npm-global/bin", "/usr/local/bin"]
+    well_known = [os.path.join('.', 'node_modules', '.bin'),
+                  os.path.join(os.path.expanduser('~'), 'npm-global', 'bin'), '/usr/local/bin']
     path_array = user_paths + well_known
     paths = os.pathsep.join(path_array)
     os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])

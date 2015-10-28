@@ -1,0 +1,4 @@
+Standard Format
+---------------
+
+- Fix cross platform paths https://github.com/bcomnes/sublime-standard-format/pull/36

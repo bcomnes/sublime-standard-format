@@ -27,7 +27,8 @@ You can find Standard Format settings in the `StandardFormat.sublime-settings` f
 
 - `format_on_save`: Boolean.  Runs Standard Format on save when set to true.  Use the command pallet to quickly toggle this on or off.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
-- `excludes`: String Array.  An array of file extensions that you don't want to run against.
+- `includes`: String Array.  An array of file extensions to always run against.
+- `excludes`: String Array.  An array of file extensions to never run against.
 - `command`: **Optional** String Array.  Customize the command and flags that **Standard Format** runs against.
 - `PATH`: **Optional** String Array.  An Array of paths to be appended to the search PATH.  You must have `node` and `standard-format` in your search path.  `/usr/local/bin` is searched by default
 - `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.

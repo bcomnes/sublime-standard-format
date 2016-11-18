@@ -30,19 +30,14 @@ def get_command(command):
     if shutil.which(command[0]):
         # Try to use provided command
         return command
-    elif command[0] != "standard-format" and shutil.which("standard-format"):
-        # Otherwise just use standard-format
-        msg = "{} could not be found. Using standard-format".format(
+    elif command[0] != "standard" and shutil.which("standard"):
+        # Otherwise just use standard
+        msg = "{} could not be found. Using standard".format(
             command[0])
         print("StandardFormat: " + msg)
-        return ["standard-format", "--stdin"]
-    elif shutil.which("standard"):
-        # and if that isn't around use standard
-        msg = "Can't find standard-format.  Falling back to standard"
-        print("StandardFormat: " + msg)
-        return ["standard", "--format", "--stdin"]
+        return ["standard", "--stdin", "--fix"]
     else:
-        msg = "Please install standard-format: 'npm i standard-format -g' \
+        msg = "Please install standard: 'npm i standard -g' \
             or extend PATH in settings"
         print("StandardFormat: " + msg)
         return None
@@ -144,7 +139,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             view.replace(edit, region, s)
         elif err:
             loud = settings.get("loud_error")
-            msg = 'standard-format: error formatting selection(s)'
+            msg = 'StandardFormat: error formatting selection(s)'
             print(msg)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
 

@@ -9,7 +9,7 @@
     // Array of command and flags to run against.
     // Content will be piped into this command
     // This is a string array that is passed to subprocess
-    "command": ["standard-format", "--stdin"],
+    "command": ["standard", "--stdin", "--fix"],
 
     // Pop up error window on formatting errors
     "loud_error": false

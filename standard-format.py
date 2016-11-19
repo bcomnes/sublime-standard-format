@@ -3,23 +3,39 @@ import sublime_plugin
 import subprocess
 import os
 import shutil
+import inspect
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
 # Please open issues if we are missing a common bin path
 
 DEFAULT_PATH = os.environ["PATH"]
-settings = None
+GLOBAL_PATH = DEFAULT_PATH
+settings = sublime.load_settings("StandardFormat.sublime-settings")
 platform = sublime.platform()
 
+def calculate_user_path(command=settings.get("get_path_command")):
+    return subprocess.check_output(command).decode("utf-8").replace('\n','')
 
-def set_path(user_paths):
+def get_global_path(get_env=settings.get("calculate_user_path")):
+    env_path = calculate_user_path() if get_env else os.environ["PATH"]
+    user_path = settings.get("PATH")
+    path_array = user_path + env_path.split(os.pathsep)
+    global_path = os.pathsep.join(path_array)
+    return global_path
+
+def get_project_path():
+    file_name = view.file_name()
+    parent_window_folders = view.window().folders()
+    project_path = [folder for folder in parent_window_folders if folder in file_name]
+    return project_path
+
+def set_base_path(user_paths):
     # Please open issues if we are missing a common bin path
-    well_known = [os.path.join('.', 'node_modules', '.bin'),
-                  os.path.join(os.path.expanduser('~'), 'npm-global', 'bin'), '/usr/local/bin']
-    path_array = user_paths + well_known
+    
+    path_array = well_known + user_paths
     paths = os.pathsep.join(path_array)
     os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])
-    msg = "Standard Format Search Path: " + os.environ["PATH"]
+    msg = "StandardFormat Search Path: " + os.environ["PATH"]
     print(msg)
 
 
@@ -45,11 +61,10 @@ def get_command(command):
 
 def plugin_loaded():
     global settings
-    settings = sublime.load_settings("StandardFormat.sublime-settings")
 
-    # Add custom user paths
-    user_paths = settings.get("PATH")
-    set_path(user_paths)
+    print('hi')
+    GLOBAL_PATH = get_global_path()
+
 
 
 def is_javascript(view):

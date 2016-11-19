@@ -1,7 +1,17 @@
 {
     "format_on_save": true,
 
+    // Arbitrary $PATH additions.
     "PATH": [],
+    // Caclulate user path from a shell
+    "calculate_user_path": true,
+    // path calculation command
+    "get_path_command": ["/usr/bin/env", "bash", "-l", "-i", "-c", "echo $PATH"],
+
+    // Search the global user ENV $PATH for commands
+    "use_global_path": true,
+    // Search for project local dev tools
+    "use_project_path": true,
 
     // array of extensions to format on save
     "extensions": ["js"],

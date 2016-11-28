@@ -3,68 +3,99 @@ import sublime_plugin
 import subprocess
 import os
 import shutil
-import inspect
+# import inspect
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
 # Please open issues if we are missing a common bin path
 
-DEFAULT_PATH = os.environ["PATH"]
-GLOBAL_PATH = DEFAULT_PATH
+# Initialize a global path.  Works on all OSs
+global_path = os.environ["PATH"]
+# load settings
 settings = sublime.load_settings("StandardFormat.sublime-settings")
 platform = sublime.platform()
 
 def calculate_user_path(command=settings.get("get_path_command")):
+    """execute a user shell to return a real env path"""
     return subprocess.check_output(command).decode("utf-8").replace('\n','')
 
-def get_global_path(get_env=settings.get("calculate_user_path")):
-    env_path = calculate_user_path() if get_env else os.environ["PATH"]
-    user_path = settings.get("PATH")
-    path_array = user_path + env_path.split(os.pathsep)
-    global_path = os.pathsep.join(path_array)
-    return global_path
+def get_view_path(path_string):
+    """
+    walk the fs from the current view to find node_modules/.bin
+    """
+    view_path_array = []
 
-def get_project_path():
-    file_name = view.file_name()
+    def search_for_bin_paths (path):
+
+        dirname = path if os.path.isdir(path) else os.path.dirname(path)
+        maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
+        found_path = os.path.isdir(maybe_bin_path)
+        if found_path:
+            view_path_array = view_path_array + [maybe_bin_path]
+        if os.path.ismount(dirname):
+            return
+        else:
+            search_for_bin_paths(os.path.dirname(dirname))
+
+    search_for_bin_paths(path_string)
+    return os.pathsep.join(project_path)
+
+def get_project_path(view):
+    """
+    generate path of node_module/.bin for open project folders
+    """
     parent_window_folders = view.window().folders()
-    project_path = [folder for folder in parent_window_folders if folder in file_name]
-    return project_path
+    project_path = [get_view_path(folder) for folder in parent_window_folders]
+    return os.pathsep.join(list(filter(None, project_path)))
+
+def generate_search_path(view):
+    """
+    run necessary work to generate a search path
+    """
+    user_path = os.pathsep.join(settings.get("PATH"))
+    search_path = [user_path]
+    if settings.get("use_view_path"):
+        if view.file_name():
+            search_path = search_path + [get_view_path(view.file_name())]
+        elif settings.get("use_view_path"):
+            search_path = search_path + [get_project_path(view)]
+    if settings.get("use_global_path"):
+        search_path = search_path + [global_path]
+
+    return os.pathsep.join(list(filter(None, search_path)))
 
 def set_base_path(user_paths):
     # Please open issues if we are missing a common bin path
-    
+    """
+    set up the correct path to search for one of the desired tools
+    """
     path_array = well_known + user_paths
     paths = os.pathsep.join(path_array)
     os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])
     msg = "StandardFormat Search Path: " + os.environ["PATH"]
     print(msg)
 
-
-def get_command(command):
+def get_command(commands):
     """
     Tries to validate and return a working formatting command
     """
-    if shutil.which(command[0]):
-        # Try to use provided command
-        return command
-    elif command[0] != "standard" and shutil.which("standard"):
-        # Otherwise just use standard
-        msg = "{} could not be found. Using standard".format(
-            command[0])
-        print("StandardFormat: " + msg)
-        return ["standard", "--stdin", "--fix"]
-    else:
-        msg = "Please install standard: 'npm i standard -g' \
-            or extend PATH in settings"
-        print("StandardFormat: " + msg)
-        return None
-
+    for command in commands:
+        if shutil.which(command[0]):
+            print("found {} at {}".format(command[0], shutil.which(command[0])))
+            return command
+    print("command not found")
+    return None
 
 def plugin_loaded():
-    global settings
-
-    print('hi')
-    GLOBAL_PATH = get_global_path()
-
+    """
+    perform some work to set up env correctly.
+    """
+    if settings.get("calculate_user_path") && platform == "windows":
+        # Update global_path with calculated user path 
+        global_path = calculate_user_path()
+    view = sublime.active_window().active_view()
+    search_path = generate_search_path(view)
+    print(search_path)
+    os.environ["PATH"] = search_path
 
 
 def is_javascript(view):
@@ -82,7 +113,6 @@ def is_javascript(view):
     if syntax and "javascript" in syntax.split("/")[-1].lower():
         return True
     return False
-
 
 def standard_format(string, command):
     """
@@ -108,19 +138,23 @@ def standard_format(string, command):
     out, err = std.communicate()
     return out.decode("utf-8").replace("\r", ""), err
 
-
 class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
         if settings.get("format_on_save") and is_javascript(view):
             view.run_command("standard_format", {"auto_save": True})
 
+    def on_activated_async(self, view):
+        if is_javascript(view):
+            search_path = generate_search_path(view)
+            print(search_path)
+            os.environ["PATH"] = search_path
 
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, auto_save=None):
         # Figure out if the desired formatter is available
-        command = get_command(settings.get("command"))
+        command = get_command(settings.get("commands"))
         if platform == "windows" and command is not None:
             # Windows hax
             command[0] = shutil.which(command[0])
@@ -128,7 +162,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             # Noop if we don't have the right tools.
             return None
         view = self.view
-        regions = []
+        regions = []    
         sel = view.sel()
 
         if auto_save:
@@ -157,7 +191,6 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             msg = 'StandardFormat: error formatting selection(s)'
             print(msg)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
-
 
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
 

@@ -11,6 +11,11 @@ DEFAULT_PATH = os.environ["PATH"]
 settings = None
 platform = sublime.platform()
 
+# List of known "false positive" syntax files
+JAVASCRIPT_SYNTAX_BLACKLIST = [
+    'JSON (JavaScriptNext).tmLanguage'
+]
+
 
 def set_path(user_paths):
     # Please open issues if we are missing a common bin path
@@ -60,12 +65,33 @@ def is_javascript(view):
     name = view.file_name()
     excludes = set(settings.get('excludes', []))
     includes = set(settings.get('includes', ['js']))
-    if name and os.path.splitext(name)[1][1:] in includes - excludes:
+
+    # Ignore files with no name
+    # (When does this happen exactly?)
+    if not name:
+        return False
+
+    # Check the extension against excluded and included extensions
+    extension = os.path.splitext(name)[1][1:]
+    if extension in excludes:
+        return False
+    if extension in includes:
         return True
-    # If it has no name (?) or it's not a JS, check the syntax
+
+    # The extension is unknown, so check the syntax
     syntax = view.settings().get("syntax")
-    if syntax and "javascript" in syntax.split("/")[-1].lower():
+    if not syntax:
+        return False
+
+    # Get the last part of the .tmLanguage path and filter using blacklist
+    syntax = syntax.split("/")[-1]
+    if syntax in JAVASCRIPT_SYNTAX_BLACKLIST:
+        return False
+
+    # If it looks like it's JavaScript, process it
+    if 'javascript' in syntax.lower():
         return True
+
     return False
 
 

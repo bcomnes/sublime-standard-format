@@ -18,17 +18,24 @@ global_path = os.environ["PATH"]
 def calculate_user_path():
     """execute a user shell to return a real env path"""
     shell_command = settings.get("get_path_command")
-    user_path = subprocess.check_output(shell_command).decode("utf-8").replace('\n','')
+    user_path = (
+        subprocess.check_output(shell_command)
+        .decode("utf-8")
+        .replace('\n', '')
+    )
     return user_path
 
 
-def search_for_bin_paths (path, view_path_array=[]):
+def search_for_bin_paths(path, view_path_array=[]):
     dirname = path if os.path.isdir(path) else os.path.dirname(path)
     maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
     found_path = os.path.isdir(maybe_bin_path)
     if found_path:
         view_path_array = view_path_array + [maybe_bin_path]
-    return view_path_array if os.path.ismount(dirname) else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
+    return (
+        view_path_array if os.path.ismount(dirname)
+        else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
+    )
 
 
 def get_view_path(path_string):
@@ -44,7 +51,11 @@ def get_project_path(view):
     generate path of node_module/.bin for open project folders
     """
     parent_window_folders = view.window().folders()
-    project_path = [get_view_path(folder) for folder in parent_window_folders] if parent_window_folders else []
+    project_path = (
+        [get_view_path(folder) for folder in parent_window_folders] if
+        parent_window_folders
+        else []
+    )
     return os.pathsep.join(list(filter(None, project_path)))
 
 
@@ -85,7 +96,10 @@ def print_status(global_path, search_path):
         print("  found {} at {}".format(command[0], shutil.which(command[0])))
         print("  command: {}".format(command))
         if settings.get("check_version"):
-            print("  {} version: {}".format(command[0], command_version(command[0])))
+            print(
+                "  {} version: {}"
+                .format(command[0], command_version(command[0]))
+            )
 
 
 def plugin_loaded():
@@ -142,7 +156,9 @@ def standard_format(string, command):
     if platform == "windows":
         # Prevent cmd.exe window from popping up
         startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        startupinfo.dwFlags |= (
+            subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        )
         startupinfo.wShowWindow = subprocess.SW_HIDE
 
     std = subprocess.Popen(
@@ -167,7 +183,9 @@ def command_version(command):
     if platform == "windows":
         # Prevent cmd.exe window from popping up
         startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        startupinfo.dwFlags |= (
+            subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        )
         startupinfo.wShowWindow = subprocess.SW_HIDE
 
     std = subprocess.Popen(

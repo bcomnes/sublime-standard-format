@@ -6,37 +6,33 @@ import shutil
 # import inspect
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
-# Please open issues if we are missing a common bin path
+
+# load settings
+settings = None
+platform = sublime.platform()
+global_path = os.environ["PATH"]
 
 # Initialize a global path.  Works on all OSs
-global_path = os.environ["PATH"]
-# load settings
-settings = sublime.load_settings("StandardFormat.sublime-settings")
-platform = sublime.platform()
 
-def calculate_user_path(command=settings.get("get_path_command")):
+def calculate_user_path():
     """execute a user shell to return a real env path"""
-    return subprocess.check_output(command).decode("utf-8").replace('\n','')
+    shell_command = settings.get("get_path_command")
+    user_path = subprocess.check_output(shell_command).decode("utf-8").replace('\n','')
+    return user_path
+
+def search_for_bin_paths (path, view_path_array=[]):
+    dirname = path if os.path.isdir(path) else os.path.dirname(path)
+    maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
+    found_path = os.path.isdir(maybe_bin_path)
+    if found_path:
+        view_path_array = view_path_array + [maybe_bin_path]
+    return view_path_array if os.path.ismount(dirname) else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
 
 def get_view_path(path_string):
     """
     walk the fs from the current view to find node_modules/.bin
     """
-    view_path_array = []
-
-    def search_for_bin_paths (path):
-
-        dirname = path if os.path.isdir(path) else os.path.dirname(path)
-        maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
-        found_path = os.path.isdir(maybe_bin_path)
-        if found_path:
-            view_path_array = view_path_array + [maybe_bin_path]
-        if os.path.ismount(dirname):
-            return
-        else:
-            search_for_bin_paths(os.path.dirname(dirname))
-
-    search_for_bin_paths(path_string)
+    project_path = search_for_bin_paths(path_string)
     return os.pathsep.join(project_path)
 
 def get_project_path(view):
@@ -51,8 +47,7 @@ def generate_search_path(view):
     """
     run necessary work to generate a search path
     """
-    user_path = os.pathsep.join(settings.get("PATH"))
-    search_path = [user_path]
+    search_path = []
     if settings.get("use_view_path"):
         if view.file_name():
             search_path = search_path + [get_view_path(view.file_name())]
@@ -60,19 +55,10 @@ def generate_search_path(view):
             search_path = search_path + [get_project_path(view)]
     if settings.get("use_global_path"):
         search_path = search_path + [global_path]
+    search_path = list(filter(None, search_path))
+    new_path = os.pathsep.join(search_path)
 
-    return os.pathsep.join(list(filter(None, search_path)))
-
-def set_base_path(user_paths):
-    # Please open issues if we are missing a common bin path
-    """
-    set up the correct path to search for one of the desired tools
-    """
-    path_array = well_known + user_paths
-    paths = os.pathsep.join(path_array)
-    os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])
-    msg = "StandardFormat Search Path: " + os.environ["PATH"]
-    print(msg)
+    return new_path
 
 def get_command(commands):
     """
@@ -80,33 +66,55 @@ def get_command(commands):
     """
     for command in commands:
         if shutil.which(command[0]):
-            print("found {} at {}".format(command[0], shutil.which(command[0])))
             return command
-    print("command not found")
     return None
+
+def print_status(global_path, search_path):
+    command = get_command(settings.get("commands"))
+    print("StandardFormat:")
+    print("  global_path: {}".format(global_path))
+    print("  search_path: {}".format(search_path))
+    if command: 
+        print("  found {} at {}".format(command[0], shutil.which(command[0])))
+        print("  command: {}".format(command))
+        if settings.get("check_version"):
+            print("  {} version: {}".format(command[0], command_version(command[0])))
+
 
 def plugin_loaded():
     """
     perform some work to set up env correctly.
     """
-    if settings.get("calculate_user_path") && platform == "windows":
-        # Update global_path with calculated user path 
-        global_path = calculate_user_path()
+    global global_path
+    global settings
+    settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
+    if platform is not "windows":
+        global_path = calculate_user_path()
     search_path = generate_search_path(view)
-    print(search_path)
     os.environ["PATH"] = search_path
+    print_status(global_path, search_path)
 
+class StandardFormatEventListener(sublime_plugin.EventListener):
+
+    def on_pre_save(self, view):
+        if settings.get("format_on_save") and is_javascript(view):
+            view.run_command("standard_format", {"auto_save": True})
+
+    def on_activated_async(self, view):
+        search_path = generate_search_path(view)
+        os.environ["PATH"] = search_path
+        if is_javascript(view) and settings.get("logging_on_view_change"):
+            print_status(global_path, search_path)
 
 def is_javascript(view):
     """
-    Checks if the current view is javascript or not.  Used in pre_save event.
+    Checks if the current view is JS or not.  Used in pre_save event.
     """
     # Check the file extension
     name = view.file_name()
-    excludes = set(settings.get('excludes', []))
-    includes = set(settings.get('includes', ['js']))
-    if name and os.path.splitext(name)[1][1:] in includes - excludes:
+    extensions = set(settings.get('extensions'))
+    if name and os.path.splitext(name)[1][1:] in extensions:
         return True
     # If it has no name (?) or it's not a JS, check the syntax
     syntax = view.settings().get("syntax")
@@ -136,19 +144,31 @@ def standard_format(string, command):
     )
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
+    return out.decode("utf-8"), err
+
+def command_version(command):
+    """
+    Uses subprocess to format a given string.
+    """
+
+    startupinfo = None
+
+    if platform == "windows":
+        # Prevent cmd.exe window from popping up
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+
+    std = subprocess.Popen(
+        [command, "--version"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        startupinfo=startupinfo
+    )
+    out, err = std.communicate()
     return out.decode("utf-8").replace("\r", ""), err
 
-class StandardFormatEventListener(sublime_plugin.EventListener):
-
-    def on_pre_save(self, view):
-        if settings.get("format_on_save") and is_javascript(view):
-            view.run_command("standard_format", {"auto_save": True})
-
-    def on_activated_async(self, view):
-        if is_javascript(view):
-            search_path = generate_search_path(view)
-            print(search_path)
-            os.environ["PATH"] = search_path
 
 class StandardFormatCommand(sublime_plugin.TextCommand):
 

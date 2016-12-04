@@ -13,7 +13,7 @@
     // real ENV variables!
     "use_global_path": true,
 
-    // array of extensions to format on save
+    // array of file extensions to format on save  e.g. file.js
     "extensions": ["js"],
 
     // Array of command and flags to run against.
@@ -22,15 +22,23 @@
     // The first command found in the search PATH is the one
     // that gets used.
     "commands": [
-        ["standard", "--stdin", "--fix"]
+        ["standard", "--stdin", "--fix"],
+        ["eslint", "--stdin", "--fix"]
     ],
-
-    // Pop up error window on formatting errors
-    "loud_error": false,
 
     //
     // ADVANCED
     //
+
+    // You probably don't need to mess with these.
+
+    // Try to report the version of the command found
+    "check_version": false,
+    // Enable status logging on view change.
+    "logging_on_view_change": false,
+
+    // Pop up error window on formatting errors
+    "loud_error": false,
 
     // Calculate user path from a shell.
     "calculate_user_path": true,

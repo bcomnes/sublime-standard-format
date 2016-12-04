@@ -24,7 +24,7 @@
     ],
 
     // log error output
-    "log_errors": false
+    "log_errors": false,
 
     //
     // ADVANCED

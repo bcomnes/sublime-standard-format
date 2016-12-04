@@ -40,18 +40,18 @@ def get_project_path(view):
     generate path of node_module/.bin for open project folders
     """
     parent_window_folders = view.window().folders()
-    project_path = [get_view_path(folder) for folder in parent_window_folders]
+    project_path = [get_view_path(folder) for folder in parent_window_folders] if parent_window_folders else []
     return os.pathsep.join(list(filter(None, project_path)))
 
 def generate_search_path(view):
     """
     run necessary work to generate a search path
     """
-    search_path = []
+    search_path = settings.get("PATH")
     if settings.get("use_view_path"):
         if view.file_name():
             search_path = search_path + [get_view_path(view.file_name())]
-        elif settings.get("use_view_path"):
+        elif settings.get("use_project_path_fallback"):
             search_path = search_path + [get_project_path(view)]
     if settings.get("use_global_path"):
         search_path = search_path + [global_path]
@@ -99,7 +99,7 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
         if settings.get("format_on_save") and is_javascript(view):
-            view.run_command("standard_format", {"auto_save": True})
+            view.run_command("standard_format")
 
     def on_activated_async(self, view):
         search_path = generate_search_path(view)
@@ -172,7 +172,7 @@ def command_version(command):
 
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
-    def run(self, edit, auto_save=None):
+    def run(self, edit):
         # Figure out if the desired formatter is available
         command = get_command(settings.get("commands"))
         if platform == "windows" and command is not None:
@@ -182,21 +182,11 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             # Noop if we don't have the right tools.
             return None
         view = self.view
-        regions = []    
+        regions = []
         sel = view.sel()
 
-        if auto_save:
-            allreg = sublime.Region(0, view.size())
-            regions.append(allreg)
-        else:
-            for region in sel:
-                if not region.empty():
-                    regions.append(region)
-
-            if len(regions) < 1:
-                # No selected regions, so format the whole file.
-                allreg = sublime.Region(0, view.size())
-                regions.append(allreg)
+        allreg = sublime.Region(0, view.size())
+        regions.append(allreg)
 
         for region in regions:
             self.do_format(edit, region, view, command)
@@ -210,6 +200,8 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             loud = settings.get("loud_error")
             msg = 'StandardFormat: error formatting selection(s)'
             print(msg)
+            if setting.get("log_errors"):
+                print(err)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
 
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):

@@ -14,11 +14,13 @@ global_path = os.environ["PATH"]
 
 # Initialize a global path.  Works on all OSs
 
+
 def calculate_user_path():
     """execute a user shell to return a real env path"""
     shell_command = settings.get("get_path_command")
     user_path = subprocess.check_output(shell_command).decode("utf-8").replace('\n','')
     return user_path
+
 
 def search_for_bin_paths (path, view_path_array=[]):
     dirname = path if os.path.isdir(path) else os.path.dirname(path)
@@ -28,12 +30,14 @@ def search_for_bin_paths (path, view_path_array=[]):
         view_path_array = view_path_array + [maybe_bin_path]
     return view_path_array if os.path.ismount(dirname) else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
 
+
 def get_view_path(path_string):
     """
     walk the fs from the current view to find node_modules/.bin
     """
     project_path = search_for_bin_paths(path_string)
     return os.pathsep.join(project_path)
+
 
 def get_project_path(view):
     """
@@ -42,6 +46,7 @@ def get_project_path(view):
     parent_window_folders = view.window().folders()
     project_path = [get_view_path(folder) for folder in parent_window_folders] if parent_window_folders else []
     return os.pathsep.join(list(filter(None, project_path)))
+
 
 def generate_search_path(view):
     """
@@ -60,6 +65,7 @@ def generate_search_path(view):
 
     return new_path
 
+
 def get_command(commands):
     """
     Tries to validate and return a working formatting command
@@ -69,12 +75,13 @@ def get_command(commands):
             return command
     return None
 
+
 def print_status(global_path, search_path):
     command = get_command(settings.get("commands"))
     print("StandardFormat:")
     print("  global_path: {}".format(global_path))
     print("  search_path: {}".format(search_path))
-    if command: 
+    if command:
         print("  found {} at {}".format(command[0], shutil.which(command[0])))
         print("  command: {}".format(command))
         if settings.get("check_version"):
@@ -95,6 +102,7 @@ def plugin_loaded():
     os.environ["PATH"] = search_path
     print_status(global_path, search_path)
 
+
 class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
@@ -106,6 +114,7 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
         os.environ["PATH"] = search_path
         if is_javascript(view) and settings.get("logging_on_view_change"):
             print_status(global_path, search_path)
+
 
 def is_javascript(view):
     """
@@ -121,6 +130,7 @@ def is_javascript(view):
     if syntax and "javascript" in syntax.split("/")[-1].lower():
         return True
     return False
+
 
 def standard_format(string, command):
     """
@@ -145,6 +155,7 @@ def standard_format(string, command):
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
     return out.decode("utf-8"), err
+
 
 def command_version(command):
     """
@@ -183,7 +194,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             return None
         view = self.view
         regions = []
-        sel = view.sel()
+        # sel = view.sel()
 
         allreg = sublime.Region(0, view.size())
         regions.append(allreg)
@@ -200,9 +211,10 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             loud = settings.get("loud_error")
             msg = 'StandardFormat: error formatting selection(s)'
             print(msg)
-            if setting.get("log_errors"):
+            if settings.get("log_errors"):
                 print(err)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
+
 
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
 

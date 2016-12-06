@@ -126,6 +126,7 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
     def on_activated_async(self, view):
         search_path = generate_search_path(view)
         os.environ["PATH"] = search_path
+        os.chdir(search_path)
         if is_javascript(view) and settings.get("logging_on_view_change"):
             print_status(global_path, search_path)
 

@@ -121,12 +121,12 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
         if settings.get("format_on_save") and is_javascript(view):
+            os.chdir(os.path.dirname(view.file_name()))
             view.run_command("standard_format")
 
     def on_activated_async(self, view):
         search_path = generate_search_path(view)
         os.environ["PATH"] = search_path
-        os.chdir(search_path)
         if is_javascript(view) and settings.get("logging_on_view_change"):
             print_status(global_path, search_path)
 
@@ -212,6 +212,9 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             # Noop if we don't have the right tools.
             return None
         view = self.view
+        
+        os.chdir(os.path.dirname(view.file_name()))
+        
         regions = []
         # sel = view.sel()
 

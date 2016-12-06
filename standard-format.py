@@ -212,9 +212,9 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             # Noop if we don't have the right tools.
             return None
         view = self.view
-        
+
         os.chdir(os.path.dirname(view.file_name()))
-        
+
         regions = []
         # sel = view.sel()
 

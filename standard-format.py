@@ -171,7 +171,8 @@ def standard_format(string, command):
     )
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
-    return out.decode("utf-8"), err
+    print(err)
+    return out.decode("utf-8"), None
 
 
 def command_version(command):

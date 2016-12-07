@@ -110,7 +110,7 @@ def plugin_loaded():
     global settings
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
-    if platform is not "windows":
+    if platform != "windows":
         global_path = calculate_user_path()
     search_path = generate_search_path(view)
     os.environ["PATH"] = search_path

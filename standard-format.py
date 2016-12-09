@@ -21,7 +21,7 @@ def calculate_user_path():
     user_path = (
         subprocess.check_output(shell_command)
         .decode("utf-8")
-        .replace('\n', '')
+        .split('\n')[0]
     )
     return user_path
 

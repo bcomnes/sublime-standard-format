@@ -12,6 +12,7 @@ SETTINGS_FILE = "StandardFormat.sublime-settings"
 settings = None
 platform = sublime.platform()
 global_path = os.environ["PATH"]
+syntax = ''
 selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
@@ -94,8 +95,8 @@ def get_command(commands):
 def print_status(global_path, search_path):
     command = get_command(settings.get("commands"))
     print("StandardFormat:")
-    print("  global_path: {}".format(global_path))
-    print("  search_path: {}".format(search_path))
+    # print("  global_path: {}".format(global_path))
+    # print("  search_path: {}".format(search_path))
     if command:
         print("  found {} at {}".format(command[0], shutil.which(command[0])))
         print("  command: {}".format(command))
@@ -226,15 +227,14 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
 
             if match:
                 view_syntax = match.group(1).lower()
-                # mapped_syntax = settings.get('syntax', {}).get(view_syntax, '').lower()
             else:
                 view_syntax = ''
 
-            if view_syntax in settings.get('syntax', []):
-                selectors = settings.get("selectors")
-                selector = selectors[view_syntax]
-            else:
-                selector = None
+        if view_syntax and view_syntax in settings.get('extensions', []):
+            selectors = settings.get("selectors")
+            selector = selectors[view_syntax]
+        else:
+            selector = None
 
         os.chdir(os.path.dirname(view.file_name()))
 

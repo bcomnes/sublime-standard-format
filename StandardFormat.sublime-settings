@@ -32,7 +32,6 @@
         ["standard", "--stdin", "--fix"]
     ],
 
-
     // log error output
     "log_errors": false,
 

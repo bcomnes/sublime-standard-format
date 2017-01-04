@@ -2,6 +2,7 @@ import sublime
 import sublime_plugin
 import subprocess
 import os
+import re
 import shutil
 # import inspect
 
@@ -11,6 +12,9 @@ SETTINGS_FILE = "StandardFormat.sublime-settings"
 settings = None
 platform = sublime.platform()
 global_path = os.environ["PATH"]
+selectors = {}
+
+SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
 # Initialize a global path.  Works on all OSs
 
@@ -169,6 +173,7 @@ def standard_format(string, command):
         stderr=subprocess.PIPE,
         startupinfo=startupinfo
     )
+
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
     print(err)
@@ -214,13 +219,32 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             return None
         view = self.view
 
+        view_syntax = view.settings().get('syntax', '')
+
+        if view_syntax:
+            match = SYNTAX_RE.search(view_syntax)
+
+            if match:
+                view_syntax = match.group(1).lower()
+            else:
+                view_syntax = ''
+
+        if view_syntax and view_syntax in settings.get('extensions', []):
+            selectors = settings.get("selectors")
+            selector = selectors[view_syntax]
+        else:
+            selector = None
+
         os.chdir(os.path.dirname(view.file_name()))
 
         regions = []
         # sel = view.sel()
 
-        allreg = sublime.Region(0, view.size())
-        regions.append(allreg)
+        if selector:
+            regions = view.find_by_selector(selector)
+        else:
+            allreg = sublime.Region(0, view.size())
+            regions.append(allreg)
 
         for region in regions:
             self.do_format(edit, region, view, command)

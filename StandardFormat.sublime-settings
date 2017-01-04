@@ -14,6 +14,15 @@
     // array of file extensions to format on save  e.g. file.js
     "extensions": ["js"],
 
+    // An array of scopes for individual file extensions.
+    // If a selector for an extension exists, StandardFormat will pass
+    // the scope's content (rather than the whole file)
+    // to whatever commands you specify.
+    "selectors": {
+        "html": "source.js.embedded.html",
+        "vue": "source.js.embedded.html"
+    },
+
     // Array of command and flags to run against.
     // Content will be piped into this command
     // This is a string array that is passed to subprocess

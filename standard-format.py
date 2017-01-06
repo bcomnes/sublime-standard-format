@@ -68,6 +68,9 @@ def generate_search_path(view):
     run necessary work to generate a search path
     """
     search_path = settings.get("PATH")
+    if not isinstance(search_path, list):
+        print("StandardFormat: PATH in settings does not appear to be an array")
+        search_path = []
     if settings.get("use_view_path"):
         if view.file_name():
             search_path = search_path + [get_view_path(view.file_name())]

@@ -12,12 +12,19 @@ SETTINGS_FILE = "StandardFormat.sublime-settings"
 settings = None
 platform = sublime.platform()
 global_path = os.environ["PATH"]
+local_path = ""
 selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
-# Initialize a global path.  Works on all OSs
+def calculate_env():
+    """Generate environment based on global environment and local path"""
+    global local_path
+    env = dict(os.environ)
+    env["PATH"] = local_path
+    return env
 
+# Initialize a global path.  Works on all OSs
 
 def calculate_user_path():
     """execute a user shell to return a real env path"""
@@ -117,13 +124,14 @@ def plugin_loaded():
     perform some work to set up env correctly.
     """
     global global_path
+    global local_path
     global settings
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
     if platform != "windows":
         global_path = calculate_user_path()
     search_path = generate_search_path(view)
-    os.environ["PATH"] = search_path
+    local_path = search_path
     print_status(global_path, search_path)
 
 
@@ -135,8 +143,9 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
             view.run_command("standard_format")
 
     def on_activated_async(self, view):
+        global local_path
         search_path = generate_search_path(view)
-        os.environ["PATH"] = search_path
+        local_path = search_path
         if is_javascript(view) and settings.get("logging_on_view_change"):
             print_status(global_path, search_path)
 
@@ -174,6 +183,7 @@ def standard_format(string, command):
 
     std = subprocess.Popen(
         command,
+        env=calculate_env(),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -203,6 +213,7 @@ def command_version(command):
 
     std = subprocess.Popen(
         [command, "--version"],
+        env=calculate_env(),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

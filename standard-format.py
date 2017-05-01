@@ -25,9 +25,12 @@ def calculate_user_path():
     user_path = (
         subprocess.check_output(shell_command)
         .decode("utf-8")
-        .split('\n')[0]
+        .split('\n')
     )
-    return user_path
+    if user_path[0].startswith('Agent pid'):
+        return user_path[1]
+    else:
+        return user_path[0]
 
 
 def search_for_bin_paths(path, view_path_array=[]):

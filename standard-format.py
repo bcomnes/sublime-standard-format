@@ -17,6 +17,7 @@ selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
+
 def calculate_env():
     """Generate environment based on global environment and local path"""
     global local_path
@@ -24,8 +25,8 @@ def calculate_env():
     env["PATH"] = local_path
     return env
 
-# Initialize a global path.  Works on all OSs
 
+# Initialize a global path.  Works on Unix only only right now
 def calculate_user_path():
     """execute a user shell to return a real env path"""
     shell_command = settings.get("get_path_command")
@@ -34,10 +35,9 @@ def calculate_user_path():
         .decode("utf-8")
         .split('\n')
     )
-    if user_path[0].startswith('Agent pid'):
-        return user_path[1]
-    else:
-        return user_path[0]
+    maybe_path = [string for string in user_path
+                  if len(string) > 0 and string[0] == os.sep]
+    return maybe_path
 
 
 def search_for_bin_paths(path, view_path_array=[]):
@@ -79,7 +79,8 @@ def generate_search_path(view):
     """
     search_path = settings.get("PATH")
     if not isinstance(search_path, list):
-        print("StandardFormat: PATH in settings does not appear to be an array")
+        print(
+            "StandardFormat: PATH in settings does not appear to be an array")
         search_path = []
     if settings.get("use_view_path"):
         if view.file_name():
@@ -129,7 +130,9 @@ def plugin_loaded():
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
     if platform != "windows":
-        global_path = calculate_user_path()
+        maybe_path = calculate_user_path()
+        if len(maybe_path) > 0:
+            global_path = maybe_path[0]
     search_path = generate_search_path(view)
     local_path = search_path
     print_status(global_path, search_path)

@@ -12,22 +12,32 @@ SETTINGS_FILE = "StandardFormat.sublime-settings"
 settings = None
 platform = sublime.platform()
 global_path = os.environ["PATH"]
+local_path = ""
 selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
-# Initialize a global path.  Works on all OSs
+
+def calculate_env():
+    """Generate environment based on global environment and local path"""
+    global local_path
+    env = dict(os.environ)
+    env["PATH"] = local_path
+    return env
 
 
+# Initialize a global path.  Works on Unix only only right now
 def calculate_user_path():
     """execute a user shell to return a real env path"""
     shell_command = settings.get("get_path_command")
     user_path = (
         subprocess.check_output(shell_command)
         .decode("utf-8")
-        .split('\n')[0]
+        .split('\n')
     )
-    return user_path
+    maybe_path = [string for string in user_path
+                  if len(string) > 0 and string[0] == os.sep]
+    return maybe_path
 
 
 def search_for_bin_paths(path, view_path_array=[]):
@@ -69,7 +79,8 @@ def generate_search_path(view):
     """
     search_path = settings.get("PATH")
     if not isinstance(search_path, list):
-        print("StandardFormat: PATH in settings does not appear to be an array")
+        print(
+            "StandardFormat: PATH in settings does not appear to be an array")
         search_path = []
     if settings.get("use_view_path"):
         if view.file_name():
@@ -114,13 +125,16 @@ def plugin_loaded():
     perform some work to set up env correctly.
     """
     global global_path
+    global local_path
     global settings
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
     if platform != "windows":
-        global_path = calculate_user_path()
+        maybe_path = calculate_user_path()
+        if len(maybe_path) > 0:
+            global_path = maybe_path[0]
     search_path = generate_search_path(view)
-    os.environ["PATH"] = search_path
+    local_path = search_path
     print_status(global_path, search_path)
 
 
@@ -132,8 +146,9 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
             view.run_command("standard_format")
 
     def on_activated_async(self, view):
+        global local_path
         search_path = generate_search_path(view)
-        os.environ["PATH"] = search_path
+        local_path = search_path
         if is_javascript(view) and settings.get("logging_on_view_change"):
             print_status(global_path, search_path)
 
@@ -171,6 +186,7 @@ def standard_format(string, command):
 
     std = subprocess.Popen(
         command,
+        env=calculate_env(),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -200,6 +216,7 @@ def command_version(command):
 
     std = subprocess.Popen(
         [command, "--version"],
+        env=calculate_env(),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

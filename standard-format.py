@@ -100,7 +100,7 @@ def get_command(commands):
     Tries to validate and return a working formatting command
     """
     for command in commands:
-        if shutil.which(command[0]):
+        if shutil.which(command[0], path=local_path):
             return command
     return None
 
@@ -111,7 +111,8 @@ def print_status(global_path, search_path):
     print("  global_path: {}".format(global_path))
     print("  search_path: {}".format(search_path))
     if command:
-        print("  found {} at {}".format(command[0], shutil.which(command[0])))
+        print("  found {} at {}".format(
+            command[0], shutil.which(command[0], path=local_path)))
         print("  command: {}".format(command))
         if settings.get("check_version"):
             print(

@@ -17,7 +17,6 @@ selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
-
 def calculate_env():
     """Generate environment based on global environment and local path"""
     global local_path
@@ -91,7 +90,6 @@ def generate_search_path(view):
         search_path = search_path + [global_path]
     search_path = list(filter(None, search_path))
     new_path = os.pathsep.join(search_path)
-
     return new_path
 
 
@@ -117,7 +115,7 @@ def print_status(global_path, search_path):
         if settings.get("check_version"):
             print(
                 "  {} version: {}"
-                .format(command[0], command_version(command[0]))
+                .format(command[0], command_version(shutil.which(command[0], path=local_path)))
             )
 
 
@@ -232,9 +230,10 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         # Figure out if the desired formatter is available
         command = get_command(settings.get("commands"))
+
         if platform == "windows" and command is not None:
             # Windows hax
-            command[0] = shutil.which(command[0])
+            command[0] = shutil.which(command[0], path=local_path)
         if not command:
             # Noop if we don't have the right tools.
             return None

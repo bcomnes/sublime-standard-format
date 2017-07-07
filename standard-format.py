@@ -17,6 +17,7 @@ selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
+
 def calculate_env():
     """Generate environment based on global environment and local path"""
     global local_path
@@ -115,8 +116,9 @@ def print_status(global_path, search_path):
         if settings.get("check_version"):
             print(
                 "  {} version: {}"
-                .format(command[0], command_version(shutil.which(command[0], path=local_path)))
-            )
+                .format(command[0], command_version(
+                    shutil.which(command[0], path=local_path)))
+             )
 
 
 def plugin_loaded():

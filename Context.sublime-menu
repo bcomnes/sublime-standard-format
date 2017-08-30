@@ -1,0 +1,12 @@
+[
+  { "caption": "-" },
+  {
+    "caption": "Standard Format",
+    "children":
+    [
+      { "caption": "Format JS", "command": "standard_format" },
+      { "caption": "-" },
+      { "caption": "Toggle Format On Save", "command": "toggle_standard_format", "checkbox": true },
+    ]
+  }
+]

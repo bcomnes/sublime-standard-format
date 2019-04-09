@@ -2,70 +2,166 @@ import sublime
 import sublime_plugin
 import subprocess
 import os
+import re
 import shutil
+# import inspect
 
 SETTINGS_FILE = "StandardFormat.sublime-settings"
-# Please open issues if we are missing a common bin path
 
-DEFAULT_PATH = os.environ["PATH"]
+# load settings
 settings = None
 platform = sublime.platform()
+global_path = os.environ["PATH"]
+local_path = ""
+selectors = {}
+
+SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
 
 
-def set_path(user_paths):
-    # Please open issues if we are missing a common bin path
-    well_known = [os.path.join('.', 'node_modules', '.bin'),
-                  os.path.join(os.path.expanduser('~'), 'npm-global', 'bin'), '/usr/local/bin']
-    path_array = user_paths + well_known
-    paths = os.pathsep.join(path_array)
-    os.environ["PATH"] = os.pathsep.join([paths, DEFAULT_PATH])
-    msg = "Standard Format Search Path: " + os.environ["PATH"]
-    print(msg)
+def calculate_env():
+    """Generate environment based on global environment and local path"""
+    global local_path
+    env = dict(os.environ)
+    env["PATH"] = local_path
+    return env
 
 
-def get_command(command):
+# Initialize a global path.  Works on Unix only only right now
+def calculate_user_path():
+    """execute a user shell to return a real env path"""
+    shell_command = settings.get("get_path_command")
+    user_path = (
+        subprocess.check_output(shell_command)
+        .decode("utf-8")
+        .split('\n')
+    )
+    maybe_path = [string for string in user_path
+                  if len(string) > 0 and string[0] == os.sep]
+    return maybe_path
+
+
+def search_for_bin_paths(path, view_path_array=[]):
+    dirname = path if os.path.isdir(path) else os.path.dirname(path)
+    maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
+    found_path = os.path.isdir(maybe_bin_path)
+    if found_path:
+        view_path_array = view_path_array + [maybe_bin_path]
+    return (
+        view_path_array if os.path.ismount(dirname)
+        else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
+    )
+
+
+def get_view_path(path_string):
+    """
+    walk the fs from the current view to find node_modules/.bin
+    """
+    project_path = search_for_bin_paths(path_string)
+    return os.pathsep.join(project_path)
+
+
+def get_project_path(view):
+    """
+    generate path of node_module/.bin for open project folders
+    """
+    parent_window_folders = view.window().folders()
+    project_path = (
+        [get_view_path(folder) for folder in parent_window_folders] if
+        parent_window_folders
+        else []
+    )
+    return os.pathsep.join(list(filter(None, project_path)))
+
+
+def generate_search_path(view):
+    """
+    run necessary work to generate a search path
+    """
+    search_path = settings.get("PATH")
+    if not isinstance(search_path, list):
+        print(
+            "StandardFormat: PATH in settings does not appear to be an array")
+        search_path = []
+    if settings.get("use_view_path"):
+        if view.file_name():
+            search_path = search_path + [get_view_path(view.file_name())]
+        elif settings.get("use_project_path_fallback"):
+            search_path = search_path + [get_project_path(view)]
+    if settings.get("use_global_path"):
+        search_path = search_path + [global_path]
+    search_path = list(filter(None, search_path))
+    new_path = os.pathsep.join(search_path)
+    return new_path
+
+
+def get_command(commands):
     """
     Tries to validate and return a working formatting command
     """
-    if shutil.which(command[0]):
-        # Try to use provided command
-        return command
-    elif command[0] != "standard-format" and shutil.which("standard-format"):
-        # Otherwise just use standard-format
-        msg = "{} could not be found. Using standard-format".format(
-            command[0])
-        print("StandardFormat: " + msg)
-        return ["standard-format", "--stdin"]
-    elif shutil.which("standard"):
-        # and if that isn't around use standard
-        msg = "Can't find standard-format.  Falling back to standard"
-        print("StandardFormat: " + msg)
-        return ["standard", "--format", "--stdin"]
-    else:
-        msg = "Please install standard-format: 'npm i standard-format -g' \
-            or extend PATH in settings"
-        print("StandardFormat: " + msg)
-        return None
+    for command in commands:
+        if shutil.which(command[0], path=local_path):
+            return command
+    return None
+
+
+def print_status(global_path, search_path):
+    command = get_command(settings.get("commands"))
+    print("StandardFormat:")
+    print("  global_path: {}".format(global_path))
+    print("  search_path: {}".format(search_path))
+    if command:
+        print("  found {} at {}".format(
+            command[0], shutil.which(command[0], path=local_path)))
+        print("  command: {}".format(command))
+        if settings.get("check_version"):
+            print(
+                "  {} version: {}"
+                .format(command[0], command_version(
+                    shutil.which(command[0], path=local_path)))
+             )
 
 
 def plugin_loaded():
+    """
+    perform some work to set up env correctly.
+    """
+    global global_path
+    global local_path
     global settings
-    settings = sublime.load_settings("StandardFormat.sublime-settings")
+    settings = sublime.load_settings(SETTINGS_FILE)
+    view = sublime.active_window().active_view()
+    if platform != "windows":
+        maybe_path = calculate_user_path()
+        if len(maybe_path) > 0:
+            global_path = maybe_path[0]
+    search_path = generate_search_path(view)
+    local_path = search_path
+    print_status(global_path, search_path)
 
-    # Add custom user paths
-    user_paths = settings.get("PATH")
-    set_path(user_paths)
+
+class StandardFormatEventListener(sublime_plugin.EventListener):
+
+    def on_pre_save(self, view):
+        if settings.get("format_on_save") and is_javascript(view):
+            os.chdir(os.path.dirname(view.file_name()))
+            view.run_command("standard_format")
+
+    def on_activated_async(self, view):
+        global local_path
+        search_path = generate_search_path(view)
+        local_path = search_path
+        if is_javascript(view) and settings.get("logging_on_view_change"):
+            print_status(global_path, search_path)
 
 
 def is_javascript(view):
     """
-    Checks if the current view is javascript or not.  Used in pre_save event.
+    Checks if the current view is JS or not.  Used in pre_save event.
     """
     # Check the file extension
     name = view.file_name()
-    excludes = set(settings.get('excludes', []))
-    includes = set(settings.get('includes', ['js']))
-    if name and os.path.splitext(name)[1][1:] in includes - excludes:
+    extensions = set(settings.get('extensions'))
+    if name and os.path.splitext(name)[1][1:] in extensions:
         return True
     # If it has no name (?) or it's not a JS, check the syntax
     syntax = view.settings().get("syntax")
@@ -84,55 +180,93 @@ def standard_format(string, command):
     if platform == "windows":
         # Prevent cmd.exe window from popping up
         startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        startupinfo.dwFlags |= (
+            subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        )
         startupinfo.wShowWindow = subprocess.SW_HIDE
 
     std = subprocess.Popen(
         command,
+        env=calculate_env(),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         startupinfo=startupinfo
     )
+
     std.stdin.write(bytes(string, 'UTF-8'))
+    out, err = std.communicate()
+    print(err)
+    return out.decode("utf-8"), None
+
+
+def command_version(command):
+    """
+    Uses subprocess to format a given string.
+    """
+
+    startupinfo = None
+
+    if platform == "windows":
+        # Prevent cmd.exe window from popping up
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= (
+            subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+        )
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+
+    std = subprocess.Popen(
+        [command, "--version"],
+        env=calculate_env(),
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        startupinfo=startupinfo
+    )
     out, err = std.communicate()
     return out.decode("utf-8").replace("\r", ""), err
 
 
-class StandardFormatEventListener(sublime_plugin.EventListener):
-
-    def on_pre_save(self, view):
-        if settings.get("format_on_save") and is_javascript(view):
-            view.run_command("standard_format", {"auto_save": True})
-
-
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
-    def run(self, edit, auto_save=None):
+    def run(self, edit):
         # Figure out if the desired formatter is available
-        command = get_command(settings.get("command"))
+        command = get_command(settings.get("commands"))
+
         if platform == "windows" and command is not None:
             # Windows hax
-            command[0] = shutil.which(command[0])
+            command[0] = shutil.which(command[0], path=local_path)
         if not command:
             # Noop if we don't have the right tools.
             return None
         view = self.view
-        regions = []
-        sel = view.sel()
 
-        if auto_save:
+        view_syntax = view.settings().get('syntax', '')
+
+        if view_syntax:
+            match = SYNTAX_RE.search(view_syntax)
+
+            if match:
+                view_syntax = match.group(1).lower()
+            else:
+                view_syntax = ''
+
+        if view_syntax and view_syntax in settings.get('extensions', []):
+            selectors = settings.get("selectors")
+            selector = selectors[view_syntax]
+        else:
+            selector = None
+
+        os.chdir(os.path.dirname(view.file_name()))
+
+        regions = []
+        # sel = view.sel()
+
+        if selector:
+            regions = view.find_by_selector(selector)
+        else:
             allreg = sublime.Region(0, view.size())
             regions.append(allreg)
-        else:
-            for region in sel:
-                if not region.empty():
-                    regions.append(region)
-
-            if len(regions) < 1:
-                # No selected regions, so format the whole file.
-                allreg = sublime.Region(0, view.size())
-                regions.append(allreg)
 
         for region in regions:
             self.do_format(edit, region, view, command)
@@ -146,6 +280,8 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             loud = settings.get("loud_error")
             msg = 'standard-format error: %s' % err.decode('utf-8').strip()
             print(msg)
+            if settings.get("log_errors"):
+                print(err)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
 
 

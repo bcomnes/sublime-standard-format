@@ -1,8 +1,8 @@
 Standard Format
 ---------------
-This auto-formatter requires that you install `standard-format` or `standard` in order to function properly:
+This auto-formatter requires that you install `standard` in order to function properly:
 
-  $ npm i standard-format -g
+  $ npm i standard -g
 
 Please file any issues with the plug-in you come across at:
 
@@ -10,7 +10,7 @@ Please file any issues with the plug-in you come across at:
 
 Auto-formatting issues can be directed at:
 
-  https://github.com/maxogden/standard-format/issues
+  https://github.com/feross/standard/issues
 
 Please view the README for more information/documentation.
 

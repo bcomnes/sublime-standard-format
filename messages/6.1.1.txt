@@ -1,0 +1,16 @@
+Standard Format
+---------------
+
+6.1.1
+
+- Fixed global path search discovery on more linux sytems.
+- Don't modify the global environment!  Aparently we were
+modifying the global environment causing side effects to other
+plugins.  Bad us!  No more though.
+
+Shoutout to @adnanademovic's fine work on these changes.
+
+If you have ideas on how we can make this plugn better, feel free to send PR's
+and open issues at:
+
+https://github.com/bcomnes/sublime-standard-format

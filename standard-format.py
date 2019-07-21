@@ -278,7 +278,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             view.replace(edit, region, s)
         elif err:
             loud = settings.get("loud_error")
-            msg = 'StandardFormat: error formatting selection(s)'
+            msg = 'standard-format error: %s' % err.decode('utf-8').strip()
             print(msg)
             if settings.get("log_errors"):
                 print(err)

@@ -66,7 +66,7 @@ def get_project_path(view):
     """
     try:
         parent_window_folders = view.window().folders()
-    except:
+    except Exception:
         parent_window_folders = []
     project_path = (
         [get_view_path(folder) for folder in parent_window_folders] if

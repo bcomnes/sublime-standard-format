@@ -64,7 +64,10 @@ def get_project_path(view):
     """
     generate path of node_module/.bin for open project folders
     """
-    parent_window_folders = view.window().folders()
+    try:
+        parent_window_folders = view.window().folders()
+    except Exception:
+        parent_window_folders = []
     project_path = (
         [get_view_path(folder) for folder in parent_window_folders] if
         parent_window_folders

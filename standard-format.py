@@ -199,8 +199,9 @@ def standard_format(string, command):
 
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
+    retcode = std.returncode
     print(err)
-    return out.decode("utf-8"), None
+    return out.decode("utf-8"), err, retcode
 
 
 def command_version(command):
@@ -276,8 +277,8 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def do_format(self, edit, region, view, command):
         s = view.substr(region)
-        s, err = standard_format(s, command)
-        if not err and len(s) > 0:
+        s, err, retcode = standard_format(s, command)
+        if not err and retcode == 0 and len(s) > 0:
             view.replace(edit, region, s)
         elif err:
             loud = settings.get("loud_error")

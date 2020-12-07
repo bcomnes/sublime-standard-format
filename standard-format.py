@@ -6,7 +6,9 @@ import re
 import shutil
 # import inspect
 
-SETTINGS_FILE = "StandardFormat.sublime-settings"
+PLUGIN_NAME = "StandardFormat"
+SETTINGS_FILE = "{}.sublime-settings".format(PLUGIN_NAME)
+PROJECT_SETTINGS_KEY = "standard_format"
 
 # load settings
 settings = None
@@ -27,9 +29,9 @@ def calculate_env():
 
 
 # Initialize a global path.  Works on Unix only only right now
-def calculate_user_path():
+def calculate_user_path(view):
     """execute a user shell to return a real env path"""
-    shell_command = settings.get("get_path_command")
+    shell_command = get_setting("get_path_command")
     user_path = (
         subprocess.check_output(shell_command)
         .decode("utf-8")
@@ -80,17 +82,17 @@ def generate_search_path(view):
     """
     run necessary work to generate a search path
     """
-    search_path = settings.get("PATH")
+    search_path = get_setting("PATH")
     if not isinstance(search_path, list):
         print(
             "StandardFormat: PATH in settings does not appear to be an array")
         search_path = []
-    if settings.get("use_view_path"):
+    if get_setting("use_view_path"):
         if view.file_name():
             search_path = search_path + [get_view_path(view.file_name())]
-        elif settings.get("use_project_path_fallback"):
+        elif get_setting("use_project_path_fallback"):
             search_path = search_path + [get_project_path(view)]
-    if settings.get("use_global_path"):
+    if get_setting("use_global_path"):
         search_path = search_path + [global_path]
     search_path = list(filter(None, search_path))
     new_path = os.pathsep.join(search_path)
@@ -107,8 +109,8 @@ def get_command(commands):
     return None
 
 
-def print_status(global_path, search_path):
-    command = get_command(settings.get("commands"))
+def print_status(view, global_path, search_path):
+    command = get_command(get_setting("commands"))
     print("StandardFormat:")
     print("  global_path: {}".format(global_path))
     print("  search_path: {}".format(search_path))
@@ -116,12 +118,30 @@ def print_status(global_path, search_path):
         print("  found {} at {}".format(
             command[0], shutil.which(command[0], path=local_path)))
         print("  command: {}".format(command))
-        if settings.get("check_version"):
+        if get_setting("check_version"):
             print(
                 "  {} version: {}"
                 .format(command[0], command_version(
                     shutil.which(command[0], path=local_path)))
              )
+
+
+def get_setting(key, default_value=None):
+    project_value = _get_project_setting(key)
+    if project_value is None:
+        return settings.get(key, default_value)
+    return project_value
+
+
+def _get_project_setting(key):
+    view = sublime.active_window().active_view()
+    project_settings = view.settings()
+    if not project_settings:
+        return None
+    sub_settings = project_settings.get(PROJECT_SETTINGS_KEY)
+    if sub_settings and key in sub_settings:
+        return sub_settings[key]
+    return None
 
 
 def plugin_loaded():
@@ -134,18 +154,18 @@ def plugin_loaded():
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
     if platform != "windows":
-        maybe_path = calculate_user_path()
+        maybe_path = calculate_user_path(view)
         if len(maybe_path) > 0:
             global_path = maybe_path[0]
     search_path = generate_search_path(view)
     local_path = search_path
-    print_status(global_path, search_path)
+    print_status(view, global_path, search_path)
 
 
 class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
-        if settings.get("format_on_save") and is_javascript(view):
+        if get_setting("format_on_save") and is_javascript(view):
             os.chdir(os.path.dirname(view.file_name()))
             view.run_command("standard_format")
 
@@ -153,8 +173,8 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
         global local_path
         search_path = generate_search_path(view)
         local_path = search_path
-        if is_javascript(view) and settings.get("logging_on_view_change"):
-            print_status(global_path, search_path)
+        if is_javascript(view) and get_setting("logging_on_view_change"):
+            print_status(view, global_path, search_path)
 
 
 def is_javascript(view):
@@ -163,7 +183,7 @@ def is_javascript(view):
     """
     # Check the file extension
     name = view.file_name()
-    extensions = set(settings.get('extensions'))
+    extensions = set(get_setting('extensions'))
     if name and os.path.splitext(name)[1][1:] in extensions:
         return True
     # If it has no name (?) or it's not a JS, check the syntax
@@ -234,8 +254,10 @@ def command_version(command):
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
+        view = self.view
+
         # Figure out if the desired formatter is available
-        command = get_command(settings.get("commands"))
+        command = get_command(get_setting("commands"))
 
         if platform == "windows" and command is not None:
             # Windows hax
@@ -243,7 +265,6 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         if not command:
             # Noop if we don't have the right tools.
             return None
-        view = self.view
 
         view_syntax = view.settings().get('syntax', '')
 
@@ -255,8 +276,8 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             else:
                 view_syntax = ''
 
-        if view_syntax and view_syntax in settings.get('extensions', []):
-            selectors = settings.get("selectors")
+        if view_syntax and view_syntax in get_setting('extensions', []):
+            selectors = get_setting("selectors")
             selector = selectors[view_syntax]
         else:
             selector = None
@@ -281,10 +302,10 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         if not err and retcode == 0 and len(s) > 0:
             view.replace(edit, region, s)
         elif err:
-            loud = settings.get("loud_error")
+            loud = get_setting("loud_error")
             msg = 'standard-format error: %s' % err.decode('utf-8').strip()
             print(msg)
-            if settings.get("log_errors"):
+            if get_setting("log_errors"):
                 print(err)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
 
@@ -292,7 +313,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        if settings.get('format_on_save', False):
+        if get_setting('format_on_save', False):
             settings.set('format_on_save', False)
             sublime.status_message("Format on save: Off")
         else:
@@ -301,4 +322,4 @@ class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
         sublime.save_settings(SETTINGS_FILE)
 
     def is_checked(self):
-        return settings.get('format_on_save', False)
+        return get_setting('format_on_save', False)

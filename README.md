@@ -3,6 +3,13 @@
 
 A Sublime Text 3 plug-in that runs [standard --fix](https://github.com/feross/standard) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Includes a few settings that let you tweak your search path to favor local dependencies over global ones.
 
+Supports any tool that accepts a `stdin` and `stdout` formatting API.  The following tools are used by default:
+
+```
+standard --fix
+semistandard --fix
+```
+
 ![action gif](https://cdn.rawgit.com/bcomnes/sublime-standard-format/master/format.gif)
 
 ## Installation
@@ -40,9 +47,37 @@ Standard Format is agressive about finding your developer dependencies.  The sea
 
 - `command`: **Optional** String Array.  Customize the command and flags that **Standard Format** runs against.
 
+Default:
+
+```json
+{
+  "commands": [
+    ["standard", "--stdin", "--fix"],
+    ["semistandard", "--stdin", "--fix" ]
+  ]
+}
+```
+
 - `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
 
 - `log_errors`: Boolean. Lets you log out errors encountered by the formatter.  Mainly used to suppress noisy formatting errors.
+
+### Project local settings
+
+If the default/user settings isn't fined grained enough, you can set project specific settings in `.sublime-project` project specific settings. See [sublime project docs](https://www.sublimetext.com/docs/3/projects.html) for more details.
+
+```json
+{
+  "settings": {
+    "standard_format": {
+      "format_on_save": true,
+      "commands": [
+        ["eslint_d", "--stdin", "--fix-to-stdout"]
+      ]
+    }
+  }
+}
+```
 
 ## Hints
 

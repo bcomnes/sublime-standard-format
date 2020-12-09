@@ -12,7 +12,7 @@
     "use_global_path": true,
 
     // array of file extensions to format on save  e.g. file.js
-    "extensions": ["js"],
+    "extensions": ["js", "jsx"],
 
     // An array of scopes for individual file extensions.
     // If a selector for an extension exists, StandardFormat will pass
@@ -29,7 +29,8 @@
     // The first command found in the search PATH is the one
     // that gets used.
     "commands": [
-        ["standard", "--stdin", "--fix"]
+        ["standard", "--stdin", "--fix"],
+        ["semistandard", "--stdin", "--fix" ]
     ],
 
     // log error output

@@ -1,0 +1,5 @@
+6.4.0
+
+- Add semistandard to the list of default commands to use.
+- Add .jsx to the list of default file extensions to operate on.
+- Document project local settings.

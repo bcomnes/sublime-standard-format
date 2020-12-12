@@ -299,7 +299,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
     def do_format(self, edit, region, view, command):
         s = view.substr(region)
         s, err, retcode = standard_format(s, command)
-        if not err and retcode == 0 and len(s) > 0:
+        if len(s) > 0:
             view.replace(edit, region, s)
         elif err:
             loud = get_setting("loud_error")

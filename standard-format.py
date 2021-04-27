@@ -43,6 +43,24 @@ def calculate_user_path(view):
     return maybe_path
 
 
+def get_view_parent_folder(view):
+    """
+    Given a view, return the path of the window folder it is in, otherwise
+    return nothing.
+    """
+    file_name = view.file_name()
+    if not file_name:
+        return None
+    try:
+        parent_window_folders = view.window().folders()
+    except Exception:
+        parent_window_folders = []
+    for folder in parent_window_folders:
+        if folder in file_name:
+            return folder
+    return None
+
+
 def get_package_root(path, top=""):
     """
     Return the path of the nearest package.json, otherwise just the directory
@@ -57,6 +75,25 @@ def get_package_root(path, top=""):
         else top if os.path.ismount(dirname)
         else get_package_root(os.path.dirname(dirname), top or dirname)
     )
+
+
+def guess_project_root(view):
+    """
+    Guess the project root for setting the best cwd.  Uses the sidebar folder
+    or closesed package.json
+    """
+    file_name = view.file_name()
+    if not file_name:
+        return None
+    maybe_view_parent_folder = get_view_parent_folder(view)
+    if maybe_view_parent_folder:
+        return maybe_view_parent_folder
+
+    maybe_packge_root = get_package_root(file_name)
+    if maybe_packge_root:
+        return maybe_packge_root
+
+    return None
 
 
 def search_for_bin_paths(path, view_path_array=[]):
@@ -178,7 +215,7 @@ def plugin_loaded():
             global_path = maybe_path[0]
     search_path = generate_search_path(view)
     local_path = search_path
-    package_root_path = get_package_root(view.file_name())
+    package_root_path = guess_project_root(view)
     print_status(view, global_path, search_path, package_root_path)
 
 
@@ -196,7 +233,7 @@ class StandardFormatEventListener(sublime_plugin.EventListener):
         search_path = generate_search_path(view)
         local_path = search_path
         if is_javascript(view):
-            package_root_path = get_package_root(view.file_name())
+            package_root_path = guess_project_root(view)
         if is_javascript(view) and get_setting("logging_on_view_change"):
             print_status(view, global_path, search_path, package_root_path)
 

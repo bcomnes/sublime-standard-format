@@ -15,6 +15,7 @@ settings = None
 platform = sublime.platform()
 global_path = os.environ["PATH"]
 local_path = ""
+package_root_path = ""
 selectors = {}
 
 SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
@@ -40,6 +41,59 @@ def calculate_user_path(view):
     maybe_path = [string for string in user_path
                   if len(string) > 0 and string[0] == os.sep]
     return maybe_path
+
+
+def get_view_parent_folder(view):
+    """
+    Given a view, return the path of the window folder it is in, otherwise
+    return nothing.
+    """
+    file_name = view.file_name()
+    if not file_name:
+        return None
+    try:
+        parent_window_folders = view.window().folders()
+    except Exception:
+        parent_window_folders = []
+    for folder in parent_window_folders:
+        if folder in file_name:
+            return folder
+    return None
+
+
+def get_package_root(path, top=""):
+    """
+    Return the path of the nearest package.json, otherwise just the directory
+    of the view.
+    """
+    dirname = path if os.path.isdir(path) else os.path.dirname(path)
+    maybe_package_root = os.path.join(dirname, 'package.json')
+    is_package_root = os.path.isfile(maybe_package_root)
+
+    return (
+        dirname if is_package_root
+        else top if os.path.ismount(dirname)
+        else get_package_root(os.path.dirname(dirname), top or dirname)
+    )
+
+
+def guess_project_root(view):
+    """
+    Guess the project root for setting the best cwd.  Uses the sidebar folder
+    or closesed package.json
+    """
+    file_name = view.file_name()
+    if not file_name:
+        return None
+    maybe_view_parent_folder = get_view_parent_folder(view)
+    if maybe_view_parent_folder:
+        return maybe_view_parent_folder
+
+    maybe_packge_root = get_package_root(file_name)
+    if maybe_packge_root:
+        return maybe_packge_root
+
+    return None
 
 
 def search_for_bin_paths(path, view_path_array=[]):
@@ -109,11 +163,12 @@ def get_command(commands):
     return None
 
 
-def print_status(view, global_path, search_path):
+def print_status(view, global_path, search_path, root_path):
     command = get_command(get_setting("commands"))
     print("StandardFormat:")
     print("  global_path: {}".format(global_path))
     print("  search_path: {}".format(search_path))
+    print("  root_path: {}".format(root_path))
     if command:
         print("  found {} at {}".format(
             command[0], shutil.which(command[0], path=local_path)))
@@ -150,6 +205,7 @@ def plugin_loaded():
     """
     global global_path
     global local_path
+    global package_root_path
     global settings
     settings = sublime.load_settings(SETTINGS_FILE)
     view = sublime.active_window().active_view()
@@ -159,22 +215,27 @@ def plugin_loaded():
             global_path = maybe_path[0]
     search_path = generate_search_path(view)
     local_path = search_path
-    print_status(view, global_path, search_path)
+    package_root_path = guess_project_root(view)
+    print_status(view, global_path, search_path, package_root_path)
 
 
 class StandardFormatEventListener(sublime_plugin.EventListener):
 
     def on_pre_save(self, view):
+        global package_root_path
         if get_setting("format_on_save") and is_javascript(view):
-            os.chdir(os.path.dirname(view.file_name()))
+            os.chdir(package_root_path or os.path.dirname(view.file_name()))
             view.run_command("standard_format")
 
     def on_activated_async(self, view):
         global local_path
+        global package_root_path
         search_path = generate_search_path(view)
         local_path = search_path
+        if is_javascript(view):
+            package_root_path = guess_project_root(view)
         if is_javascript(view) and get_setting("logging_on_view_change"):
-            print_status(view, global_path, search_path)
+            print_status(view, global_path, search_path, package_root_path)
 
 
 def is_javascript(view):
@@ -254,6 +315,7 @@ def command_version(command):
 class StandardFormatCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
+        global package_root_path
         view = self.view
 
         # Figure out if the desired formatter is available
@@ -282,7 +344,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         else:
             selector = None
 
-        os.chdir(os.path.dirname(view.file_name()))
+        os.chdir(package_root_path or os.path.dirname(view.file_name()))
 
         regions = []
         # sel = view.sel()

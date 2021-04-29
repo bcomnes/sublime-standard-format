@@ -1,0 +1,5 @@
+6.4.2
+
+- Try to set the CWD of the format process closer to the root of the project.
+- Better process placement should mean better results for ts-standard and its ability to find the nessisary config files.
+- Thank you @carlpett for pointing this issue out.

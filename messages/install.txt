@@ -1,8 +1,8 @@
 Standard Format
 ---------------
-This auto-formatter requires that you install `standard` in order to function properly:
+This auto-formatter requires that you install `standard` as a devDependency in order to function properly:
 
-  $ npm i standard -g
+  $ npm i standard --save-dev
 
 Please file any issues with the plug-in you come across at:
 

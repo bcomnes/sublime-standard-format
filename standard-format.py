@@ -281,7 +281,8 @@ def standard_format(string, command):
     std.stdin.write(bytes(string, 'UTF-8'))
     out, err = std.communicate()
     retcode = std.returncode
-    print(err)
+    if len(err) > 0:
+        print(err.decode("utf-8"))
     return out.decode("utf-8"), err, retcode
 
 

@@ -328,6 +328,9 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             # Noop if we don't have the right tools.
             return None
 
+        # Replace any placeholders in the command
+        command = self.replace_placeholders(command)
+
         view_syntax = view.settings().get('syntax', '')
 
         if view_syntax:
@@ -370,6 +373,20 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             if get_setting("log_errors"):
                 print(err)
             sublime.error_message(msg) if loud else sublime.status_message(msg)
+
+    def replace_placeholders(self, command):
+        """
+        Replaces brace-delimited placeholders in command. Currently these are
+        supported:
+        - FILENAME: Replaced with full path to current file
+        """
+        replacements = {
+            '{FILENAME}': self.view.file_name()
+        }
+        for (placeholder, replacement) in replacements.items():
+            for idx in range(len(command)):
+                command[idx] = command[idx].replace(placeholder, replacement)
+        return command
 
 
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):

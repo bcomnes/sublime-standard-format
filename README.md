@@ -45,7 +45,7 @@ Standard Format is agressive about finding your developer dependencies.  The sea
 - `format_on_save`: Boolean.  Runs Standard Format on save when set to true.  Use the command pallet to quickly toggle this on or off.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
 
-- `command`: **Optional** String Array.  Customize the command and flags that **Standard Format** runs against.
+- `command`: **Optional** String Array.  Customize the command and flags that **Standard Format** runs against. Can expand certain pre-defined placeholders (such as `{FILENAME}`).
 
 Default:
 
@@ -54,6 +54,7 @@ Default:
   "commands": [
     ["standard", "--stdin", "--fix"],
     ["semistandard", "--stdin", "--fix" ]
+    ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ]
   ]
 }
 ```

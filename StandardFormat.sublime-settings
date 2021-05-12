@@ -30,7 +30,8 @@
     // that gets used.
     "commands": [
         ["standard", "--stdin", "--fix"],
-        ["semistandard", "--stdin", "--fix" ]
+        ["semistandard", "--stdin", "--fix" ],
+        ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ]
     ],
 
     // log error output

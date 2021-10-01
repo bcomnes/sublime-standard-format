@@ -1,5 +1,5 @@
 # Standard Format
-[![Build Status](https://travis-ci.org/bcomnes/sublime-standard-format.svg?branch=master)](https://travis-ci.org/bcomnes/sublime-standard-format)
+[![tests](https://github.com/bcomnes/sublime-standard-format/actions/workflows/tests.yml/badge.svg)](https://github.com/bcomnes/sublime-standard-format/actions/workflows/tests.yml)
 
 A Sublime Text 3 plug-in that runs [standard --fix](https://github.com/feross/standard) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Includes a few settings that let you tweak your search path to favor local dependencies over global ones.
 

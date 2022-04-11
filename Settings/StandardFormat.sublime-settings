@@ -1,0 +1,76 @@
+    {
+        // Run standardjs on save to format the current file
+        "format_on_save": true,
+        // Arbitrary $PATH additions. Set this if standardjs is installed globally.
+        "PATH": [],
+        // walk the file system looking for node_modules/.bin to prepend to PATH
+        "use_view_path": true,
+        // fall back to project paths when a view path isn't available
+        // e.g. with an unsaved view buffer, open in a project view
+        "use_project_path_fallback": true,
+        // Search the global user ENV $PATH for commands.  Actually uses your
+        // real ENV variables!
+        "use_global_path": true,
+        // array of file extensions to format on save  e.g. file.js
+        "extensions": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx"
+        ],
+        // An array of scopes for individual file extensions.
+        // If a selector for an extension exists, StandardFormat will pass
+        // the scope's content (rather than the whole file)
+        // to whatever commands you specify.
+        "selectors": {
+            "html": "source.js.embedded.html",
+            "vue": "source.js.embedded.html"
+        },
+        // Array of command and flags to run against.
+        // Content will be piped into this command
+        // This is a string array that is passed to subprocess
+        // The first command found in the search PATH is the one
+        // that gets used.
+        "commands": [
+            [
+                "standard",
+                "--stdin",
+                "--fix"
+            ],
+            [
+                "semistandard",
+                "--stdin",
+                "--fix"
+            ],
+            [
+                "ts-standard",
+                "--stdin",
+                "--fix",
+                "--stdin-filename",
+                "{FILENAME}"
+            ]
+        ],
+        // log error output
+        "log_errors": false,
+        //
+        // ADVANCED
+        //
+        // You probably don't need to mess with these.
+        // Try to report the version of the command found
+        "check_version": false,
+        // Enable status logging on view change.
+        "logging_on_view_change": false,
+        // Pop up error window on formatting errors
+        "loud_error": false,
+        // Calculate user path from a shell.
+        "calculate_user_path": true,
+        // path calculation command
+        "get_path_command": [
+            "/usr/bin/env",
+            "bash",
+            "-l",
+            "-i",
+            "-c",
+            "echo $PATH"
+        ]
+    }

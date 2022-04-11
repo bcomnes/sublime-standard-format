@@ -1,0 +1,3 @@
+6.3.0
+
+- Enable loading of settings from projec local `.sublime-project` file.  Thank you @vonas. https://github.com/bcomnes/sublime-standard-format/pull/75

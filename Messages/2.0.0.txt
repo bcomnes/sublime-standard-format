@@ -1,0 +1,4 @@
+Standard Format
+---------------
+
+- Standard Format now uses the "command" field to locate standard-format (breaking change)

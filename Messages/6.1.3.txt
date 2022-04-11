@@ -1,0 +1,3 @@
+6.1.3
+
+- Fix critical bug on windows.  The plugin should work on windows again.  Sorry about that folks.  I haven't been using windows all that often these days.

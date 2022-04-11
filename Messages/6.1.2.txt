@@ -1,0 +1,3 @@
+6.1.2
+
+- Fixed bug preventig sublime-standard-format from finding the correct command

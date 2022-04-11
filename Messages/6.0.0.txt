@@ -1,0 +1,21 @@
+Standard Format
+---------------
+
+Hi folks!  This is a major update to Standard Format, the sublime text plugin.
+
+A few major announcements:
+
+  * `standard-format` the node.js program that this plugin previously used is now depreciated.  Please uninstall and remove all remnants of that program!
+  * `standard` now comes with a `--fix` flag that this will use by default.
+
+Here are the major changes in this version of standard format:
+
+- Local node_modules are now supported and preferred over global versions of standard.
+
+- We attempt to calculate the a real user $PATH by starting a shell instance, so things like NVM should work for the most part.
+
+- Please review the default settings file, and compare it to your user settings file.  Things have changed around a bit.  I recommend removing settings you no longer need.
+
+Its been a long time coming, but I hope that these changes help with a smoother and more automated work flow allowing sublime text to reason about when to use a JS formatter and when not to.
+
+If you have any issues, please open up issues and I will do my best to get things sorted out.

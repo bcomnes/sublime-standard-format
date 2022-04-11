@@ -1,0 +1,4 @@
+6.2.0
+
+- Show errors in status bar
+- Add context meny item

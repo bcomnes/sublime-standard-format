@@ -1,5 +1,0 @@
-Standard Format
----------------
-
-- Fix CWD when running the subprocess
-- Improved search path generation.  There was a bug where extra bash ouput would make it into the path.

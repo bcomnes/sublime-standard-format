@@ -1,4 +1,0 @@
-Standard Format
----------------
-
-- Default to `standard --fix --stdin`.  Please update to the latest `standard`!

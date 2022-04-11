@@ -1,4 +1,0 @@
-6.4.1
-
-- Fix regression preventing from formatting with standard or semistandard. Thank you @pmjam
-- Please open new issues if you run into any other issues.

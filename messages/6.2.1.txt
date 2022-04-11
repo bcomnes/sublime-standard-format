@@ -1,3 +1,0 @@
-6.2.1
-
-- Handle errors throwing from files on NFS mounts ([#74](https://github.com/bcomnes/sublime-standard-format/pull/74))

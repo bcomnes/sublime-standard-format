@@ -1,3 +1,0 @@
-7.0.1
-
-- edit_settings API for preferences (dual pane: default, user settings.)

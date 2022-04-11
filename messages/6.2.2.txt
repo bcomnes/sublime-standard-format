@@ -1,3 +1,0 @@
-6.2.2
-
-- Fix bug where buffer would get replaced with an error when there was an error code. (https://github.com/bcomnes/sublime-standard-format/pull/76) Thank you @vonas.

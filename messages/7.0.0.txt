@@ -1,4 +1,0 @@
-7.0.0
-
-- Switch to new Python 3.8 runtime for better performance.
-- Sublime Text 4 required. 

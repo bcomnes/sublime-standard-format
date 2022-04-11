@@ -1,5 +1,0 @@
-6.5.0
-
-- Improved support for ts-standard
-- Add support for `{FILENAME}` placeholder in commands array. See Docs.
-- Thank you @carlpett for this feature!

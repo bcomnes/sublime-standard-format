@@ -13,35 +13,9 @@
                 "caption": "Settings",
                 "command": "edit_settings",
                 "args": {
-                  "base_file": "${packages}/StandardFormat/Settings/StandardFormat.sublime-settings",
+                  "base_file": "${packages}/standard_format/Settings/StandardFormat.sublime-settings",
                   "default": "{\n\t$0\n}\n"
                 }
-              },
-              {
-                "caption": "Key Bindings",
-                "command": "edit_settings",
-                "args": {
-                  "base_file": "${packages}/StandardFormat/Keymaps/Default (${platform}).sublime-keymap",
-                  "default": "{\n\t$0\n}\n"
-                }
-              },
-              {
-                "caption": "-"
-              },
-              {
-                "caption": "README",
-                "command": "open_file",
-                "args": {
-                  "file": "${packages}/StandardFormat/README.md"
-                }
-              },
-              {
-                "caption": "-"
-              },
-              {
-                "command": "toggle_standard_format",
-                "caption": "Format On Save",
-                "checkbox": true
               }
             ]
           }

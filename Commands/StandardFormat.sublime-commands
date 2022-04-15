@@ -1,25 +1,9 @@
 [
     {
-        "caption": "Standard Format: Format current file",
-        "command": "standard_format"
-    },
-    {
-        "caption": "Standard Format: Toggle format on save",
-        "command": "toggle_standard_format"
-    },
-    {
         "caption": "Preferences: Standard Format Settings",
         "command": "edit_settings",
         "args": {
-            "base_file": "${packages}/StandardFormat/Settings/StandardFormat.sublime-settings",
-            "default": "{\n\t$0\n}\n"
-        }
-    },
-    {
-        "caption": "Preferences: Standard Format Key Bindings",
-        "command": "edit_settings",
-        "args": {
-            "base_file": "${packages}/StandardFormat/Keymaps/Default (${platform}).sublime-keymap",
+            "base_file": "${packages}/standard_format/Settings/StandardFormat.sublime-settings",
             "default": "{\n\t$0\n}\n"
         }
     },

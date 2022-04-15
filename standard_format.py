@@ -4,6 +4,7 @@ import subprocess
 import os
 import re
 import shutil
+
 # import inspect
 
 PLUGIN_NAME = "StandardFormat"
@@ -18,7 +19,7 @@ local_path = ""
 package_root_path = ""
 selectors = {}
 
-SYNTAX_RE = re.compile(r'(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$')
+SYNTAX_RE = re.compile(r"(?i)/([^/]+)\.(?:tmLanguage|sublime-syntax)$")
 
 
 def calculate_env():
@@ -34,12 +35,13 @@ def calculate_user_path(view):
     """execute a user shell to return a real env path"""
     shell_command = get_setting("get_path_command")
     user_path = (
-        subprocess.check_output(shell_command)
-        .decode("utf-8")
-        .split('\n')
+        subprocess.check_output(shell_command).decode("utf-8").split("\n")
     )
-    maybe_path = [string for string in user_path
-                  if len(string) > 0 and string[0] == os.sep]
+    maybe_path = [
+        string
+        for string in user_path
+        if len(string) > 0 and string[0] == os.sep
+    ]
     return maybe_path
 
 
@@ -67,12 +69,14 @@ def get_package_root(path, top=""):
     of the view.
     """
     dirname = path if os.path.isdir(path) else os.path.dirname(path)
-    maybe_package_root = os.path.join(dirname, 'package.json')
+    maybe_package_root = os.path.join(dirname, "package.json")
     is_package_root = os.path.isfile(maybe_package_root)
 
     return (
-        dirname if is_package_root
-        else top if os.path.ismount(dirname)
+        dirname
+        if is_package_root
+        else top
+        if os.path.ismount(dirname)
         else get_package_root(os.path.dirname(dirname), top or dirname)
     )
 
@@ -98,12 +102,13 @@ def guess_project_root(view):
 
 def search_for_bin_paths(path, view_path_array=[]):
     dirname = path if os.path.isdir(path) else os.path.dirname(path)
-    maybe_bin_path = os.path.join(dirname, 'node_modules', '.bin')
+    maybe_bin_path = os.path.join(dirname, "node_modules", ".bin")
     found_path = os.path.isdir(maybe_bin_path)
     if found_path:
         view_path_array = view_path_array + [maybe_bin_path]
     return (
-        view_path_array if os.path.ismount(dirname)
+        view_path_array
+        if os.path.ismount(dirname)
         else search_for_bin_paths(os.path.dirname(dirname), view_path_array)
     )
 
@@ -125,8 +130,8 @@ def get_project_path(view):
     except Exception:
         parent_window_folders = []
     project_path = (
-        [get_view_path(folder) for folder in parent_window_folders] if
-        parent_window_folders
+        [get_view_path(folder) for folder in parent_window_folders]
+        if parent_window_folders
         else []
     )
     return os.pathsep.join(list(filter(None, project_path)))
@@ -139,7 +144,8 @@ def generate_search_path(view):
     search_path = get_setting("PATH")
     if not isinstance(search_path, list):
         print(
-            "StandardFormat: PATH in settings does not appear to be an array")
+            "StandardFormat: PATH in settings does not appear to be an array"
+        )
         search_path = []
     if get_setting("use_view_path"):
         if view.file_name():
@@ -170,15 +176,19 @@ def print_status(view, global_path, search_path, root_path):
     print("  search_path: {}".format(search_path))
     print("  root_path: {}".format(root_path))
     if command:
-        print("  found {} at {}".format(
-            command[0], shutil.which(command[0], path=local_path)))
+        print(
+            "  found {} at {}".format(
+                command[0], shutil.which(command[0], path=local_path)
+            )
+        )
         print("  command: {}".format(command))
         if get_setting("check_version"):
             print(
-                "  {} version: {}"
-                .format(command[0], command_version(
-                    shutil.which(command[0], path=local_path)))
-             )
+                "  {} version: {}".format(
+                    command[0],
+                    command_version(shutil.which(command[0], path=local_path)),
+                )
+            )
 
 
 def get_setting(key, default_value=None):
@@ -220,7 +230,6 @@ def plugin_loaded():
 
 
 class StandardFormatEventListener(sublime_plugin.EventListener):
-
     def on_pre_save(self, view):
         global package_root_path
         if get_setting("format_on_save") and is_javascript(view):
@@ -244,7 +253,7 @@ def is_javascript(view):
     """
     # Check the file extension
     name = view.file_name()
-    extensions = set(get_setting('extensions'))
+    extensions = set(get_setting("extensions"))
     if name and os.path.splitext(name)[1][1:] in extensions:
         return True
     # If it has no name (?) or it's not a JS, check the syntax
@@ -275,10 +284,10 @@ def standard_format(string, command):
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        startupinfo=startupinfo
+        startupinfo=startupinfo,
     )
 
-    std.stdin.write(bytes(string, 'UTF-8'))
+    std.stdin.write(bytes(string, "UTF-8"))
     out, err = std.communicate()
     retcode = std.returncode
     if len(err) > 0:
@@ -307,14 +316,13 @@ def command_version(command):
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        startupinfo=startupinfo
+        startupinfo=startupinfo,
     )
     out, err = std.communicate()
     return out.decode("utf-8").replace("\r", ""), err
 
 
 class StandardFormatCommand(sublime_plugin.TextCommand):
-
     def run(self, edit):
         global package_root_path
         view = self.view
@@ -332,7 +340,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         # Replace any placeholders in the command
         command = self.replace_placeholders(command)
 
-        view_syntax = view.settings().get('syntax', '')
+        view_syntax = view.settings().get("syntax", "")
 
         if view_syntax:
             match = SYNTAX_RE.search(view_syntax)
@@ -340,9 +348,9 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             if match:
                 view_syntax = match.group(1).lower()
             else:
-                view_syntax = ''
+                view_syntax = ""
 
-        if view_syntax and view_syntax in get_setting('extensions', []):
+        if view_syntax and view_syntax in get_setting("extensions", []):
             selectors = get_setting("selectors")
             selector = selectors[view_syntax]
         else:
@@ -369,7 +377,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             view.replace(edit, region, s)
         elif err:
             loud = get_setting("loud_error")
-            msg = 'standard-format error: %s' % err.decode('utf-8').strip()
+            msg = "standard-format error: %s" % err.decode("utf-8").strip()
             print(msg)
             if get_setting("log_errors"):
                 print(err)
@@ -381,9 +389,7 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
         supported:
         - FILENAME: Replaced with full path to current file
         """
-        replacements = {
-            '{FILENAME}': self.view.file_name()
-        }
+        replacements = {"{FILENAME}": self.view.file_name()}
         for (placeholder, replacement) in replacements.items():
             for idx in range(len(command)):
                 command[idx] = command[idx].replace(placeholder, replacement)
@@ -391,15 +397,14 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
 
 
 class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
-
     def run(self, edit):
-        if get_setting('format_on_save', False):
-            settings.set('format_on_save', False)
+        if get_setting("format_on_save", False):
+            settings.set("format_on_save", False)
             sublime.status_message("Format on save: Off")
         else:
-            settings.set('format_on_save', True)
+            settings.set("format_on_save", True)
             sublime.status_message("Format on save: On")
         sublime.save_settings(SETTINGS_FILE)
 
     def is_checked(self):
-        return get_setting('format_on_save', False)
+        return get_setting("format_on_save", False)

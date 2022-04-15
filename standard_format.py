@@ -394,17 +394,3 @@ class StandardFormatCommand(sublime_plugin.TextCommand):
             for idx in range(len(command)):
                 command[idx] = command[idx].replace(placeholder, replacement)
         return command
-
-
-class ToggleStandardFormatCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        if get_setting("format_on_save", False):
-            settings.set("format_on_save", False)
-            sublime.status_message("Format on save: Off")
-        else:
-            settings.set("format_on_save", True)
-            sublime.status_message("Format on save: On")
-        sublime.save_settings(SETTINGS_FILE)
-
-    def is_checked(self):
-        return get_setting("format_on_save", False)

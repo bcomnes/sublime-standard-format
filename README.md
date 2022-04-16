@@ -1,37 +1,40 @@
 # Standard Format
-[![tests](https://github.com/bcomnes/sublime-standard-format/actions/workflows/tests.yml/badge.svg)](https://github.com/bcomnes/sublime-standard-format/actions/workflows/tests.yml)
 
-A Sublime Text 3 plug-in that runs [standard --fix](https://github.com/feross/standard) against the javascript code in your ST3 window on save or manually.  Can be toggled on or off.  Includes a few settings that let you tweak your search path to favor local dependencies over global ones.
+Sublime Text package to provide formatting with [standardjs](https://standardjs.com/). Matching both `.js`, `.jsx`, `.ts`, and `.tsx`, source files.
 
-Supports any tool that accepts a `stdin` and `stdout` formatting API.  The following tools are used by default:
+## Requirements
 
+1. Standard JS is a requirement, please follow the installation instructions [here](https://standardjs.com/index.html#install).
+
+## Install
+
+1. Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) to open the Command Palette
+2. Select **Package Control: Install Package**
+3. Select **StandardFormat**
+
+## SublimeLinter Integration
+
+Standard Format pairs nicely with the following [SublimeLinter](https://www.sublimelinter.com/en/latest/) plugins:
+
+- [SublimeLinter-contrib-standard](https://packagecontrol.io/packages/SublimeLinter-contrib-standard)
+- [SublimeLinter-contrib-semistandard](https://packagecontrol.io/packages/SublimeLinter-contrib-semistandard)
+- [SublimeLinter-contrib-ts-standard](https://packagecontrol.io/packages/SublimeLinter-contrib-ts-standard)
+
+## Usage
+
+When `format_on_save` is enabled, the plugin runs the following commands against the matching source files:
+
+```json
+{
+  "commands": [
+    ["standard", "--stdin", "--fix"], // for .jx and .jsx
+    ["semistandard", "--stdin", "--fix" ] // for .jx and .jsx
+    ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ] // for .tx and .tsx
+  ]
+}
 ```
-standard --fix
-semistandard --fix
-```
-
-![action gif](https://cdn.rawgit.com/bcomnes/sublime-standard-format/master/format.gif)
-
-## Installation
-
-Install Standard Format using [Package Control](https://packagecontrol.io/).
-
-```sh
-# In the command palate
-- package control install
-- standard format
-```
-
-Standard Format (the Sublime Text Plug-in) requires that you install [`standard`](https://github.com/feross/standard) either locally to your project or globally.  It is recomended to save it to your local project.
-
-```sh
-$ npm install standard@latest --save-dev
-```
-
 
 ## Configuration
-
-You can find Standard Format settings in the `StandardFormat.sublime-settings` file.
 
 Standard Format is agressive about finding your developer dependencies.  The search path that it uses by default are in the following order:
 
@@ -44,59 +47,10 @@ Standard Format is agressive about finding your developer dependencies.  The sea
 
 - `format_on_save`: Boolean.  Runs Standard Format on save when set to true.  Use the command pallet to quickly toggle this on or off.
 - `extensions`: String Array.  An array of file extensions that you want to be able to run Standard Format against.
-
 - `command`: **Optional** String Array.  Customize the command and flags that **Standard Format** runs against. Can expand certain pre-defined placeholders (such as `{FILENAME}`).
-
-Default:
-
-```json
-{
-  "commands": [
-    ["standard", "--stdin", "--fix"],
-    ["semistandard", "--stdin", "--fix" ]
-    ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ]
-  ]
-}
-```
-
-- `loud_error`: Boolean.  Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
-
+- `loud_error`: Boolean. Specifies if you get a status bar message or error window if the subprocess encounters an error while formatting.
 - `log_errors`: Boolean. Lets you log out errors encountered by the formatter.  Mainly used to suppress noisy formatting errors.
 
-### Project local settings
+## Contributing
 
-If the default/user settings isn't fined grained enough, you can set project specific settings in `.sublime-project` project specific settings. See [sublime project docs](https://www.sublimetext.com/docs/3/projects.html) for more details.
-
-```json
-{
-  "settings": {
-    "standard_format": {
-      "format_on_save": true,
-      "commands": [
-        ["eslint_d", "--stdin", "--fix-to-stdout"]
-      ]
-    }
-  }
-}
-```
-
-## Hints
-
-Windows is now supported.  Please open any issues that you come across.
-
-## Linter
-
-Standard Format pairs nicely with the Sublime Text `standard` linter:
-
-- [Flet/SublimeLinter-contrib-standard](https://github.com/Flet/SublimeLinter-contrib-standard)
-
-## References
-
-- https://github.com/piuccio/sublime-esformatter
-- https://github.com/ionutvmi/sublime-jsfmt
-- https://github.com/enginespot/js-beautify-sublime
-- https://github.com/jdc0589/JsFormat/commits/master
-- https://github.com/akalongman/sublimetext-codeformatter
-- https://github.com/DisposaBoy/GoSublime
-- https://github.com/Flet/SublimeLinter-contrib-standard
-
+Contributions are more than welcome :) Should you like to help out, please bear in mind that contribution should follow the guidelines specified in the [pyproject.toml](./pyproject.toml) file. (**flake8**, **black**).

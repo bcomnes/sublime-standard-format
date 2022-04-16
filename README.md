@@ -1,10 +1,11 @@
 # Standard Format
 
-Sublime Text package to provide formatting with [standardjs](https://standardjs.com/). Matching both `.js`, `.jsx`, `.ts`, and `.tsx`, source files.
+Sublime Text package to provide formatting with [standardjs](https://standardjs.com/). Matching `.js`, `.jsx`, `.ts`, and `.tsx`, source files.
 
 ## Requirements
 
 1. Standard JS is a requirement, please follow the installation instructions [here](https://standardjs.com/index.html#install).
+2. TypeScript is optional/available, please follow the installation instructions [here](https://standardjs.com/#typescript).
 
 ## Install
 
@@ -12,7 +13,7 @@ Sublime Text package to provide formatting with [standardjs](https://standardjs.
 2. Select **Package Control: Install Package**
 3. Select **StandardFormat**
 
-## SublimeLinter Integration
+## Linter Integration
 
 Standard Format pairs nicely with the following [SublimeLinter](https://www.sublimelinter.com/en/latest/) plugins:
 
@@ -27,9 +28,9 @@ When `format_on_save` is enabled, the plugin runs the following commands against
 ```json
 {
   "commands": [
-    ["standard", "--stdin", "--fix"], // for .jx and .jsx
-    ["semistandard", "--stdin", "--fix" ] // for .jx and .jsx
-    ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ] // for .tx and .tsx
+    ["standard", "--stdin", "--fix"],
+    ["semistandard", "--stdin", "--fix" ]
+    ["ts-standard", "--stdin", "--fix", "--stdin-filename", "{FILENAME}" ]
   ]
 }
 ```

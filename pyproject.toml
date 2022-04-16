@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 79
-target-version = ['py38']
+target-version = ['py33']
 include = '\.pyi?$'
 extend-exclude = '''
 # A regex preceded with ^/ will apply only to files and directories
@@ -9,10 +9,10 @@ extend-exclude = '''
 '''
 
 [tool.pyright]
-pythonVersion = '3.8'
+pythonVersion = '3.3'
 venvPath = ''
 venv = ''
 extraPaths = [
-        "/Applications/Sublime Text.app/Contents/MacOS/Lib/python38",
+        "/Applications/Sublime Text.app/Contents/MacOS/Lib/python33",
         "/usr/local/Caskroom/miniconda/base/bin"
     ]

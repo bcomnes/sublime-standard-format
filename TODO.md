@@ -8,7 +8,9 @@
   - view path
   - log errors
   - adavanced crap
-
 - remove project settings, leave that to package json and use it
-- add flow support: https://standardjs.com/#flow
+
+## Maybes
+
+- add flow support? https://standardjs.com/#flow
 - add markdown support? https://standardjs.com/#can-i-check-code-inside-of-markdown-or-html-files
